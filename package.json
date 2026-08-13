@@ -1,0 +1,44 @@
+{
+  "name": "microlighter",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A tiny, dependency-free syntax highlighter built on the CSS Custom Highlight API and TextMate grammars.",
+  "type": "module",
+  "main": "./src/index.js",
+  "module": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./highlighter": "./src/highlighter.js",
+    "./min": "./microlighter.min.js",
+    "./grammars/*": "./src/grammars/*.js",
+    "./themes/*": "./src/themes/*.css"
+  },
+  "files": [
+    "src",
+    "microlighter.min.js"
+  ],
+  "sideEffects": [
+    "./src/index.js",
+    "./microlighter.min.js"
+  ],
+  "scripts": {
+    "build": "./build.sh"
+  },
+  "keywords": [
+    "syntax-highlighting",
+    "highlighter",
+    "textmate",
+    "css-custom-highlight",
+    "code"
+  ],
+  "author": "Dave Rupert <rupato@gmail.com> (https://daverupert.com)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davatron5000/microlighter.git"
+  },
+  "homepage": "https://github.com/davatron5000/microlighter#readme",
+  "bugs": {
+    "url": "https://github.com/davatron5000/microlighter/issues"
+  }
+}

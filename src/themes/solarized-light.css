@@ -1,0 +1,54 @@
+[data-syntax-theme="solarized-light"] {
+  --syntax-background: light-dark(#fdf6e3, #002b36);
+  --syntax-foreground: light-dark(#657b83, #93a1a1);
+  --syntax-comment: light-dark(#93a1a1, #586e75);
+  --syntax-keyword: light-dark(#859900, #b8c927);
+  --syntax-operator: light-dark(#859900, #b8c927);
+  --syntax-string: light-dark(#2aa198, #58c7bd);
+  --syntax-constant: light-dark(#d33682, #e26aa5);
+  --syntax-function: light-dark(#268bd2, #5eb7e5);
+  --syntax-type: light-dark(#b58900, #d9b72f);
+  --syntax-variable: light-dark(#657b83, #93a1a1);
+  --syntax-property: light-dark(#268bd2, #5eb7e5);
+  --syntax-tag: light-dark(#268bd2, #5eb7e5);
+  --syntax-selector: light-dark(#268bd2, #5eb7e5);
+
+  color-scheme: light dark;
+  background-color: var(--syntax-background);
+  color: var(--syntax-foreground);
+}
+
+::highlight(comment) { color: var(--syntax-comment); }
+
+::highlight(keyword),
+::highlight(atrule),
+::highlight(doctype),
+::highlight(important) { color: var(--syntax-keyword); }
+
+::highlight(operator),
+::highlight(punctuation) { color: var(--syntax-operator); }
+
+::highlight(string),
+::highlight(regex),
+::highlight(attr-value),
+::highlight(url) { color: var(--syntax-string); }
+
+::highlight(number),
+::highlight(boolean),
+::highlight(constant),
+::highlight(symbol),
+::highlight(entity) { color: var(--syntax-constant); }
+
+::highlight(function) { color: var(--syntax-function); }
+
+::highlight(class-name),
+::highlight(builtin) { color: var(--syntax-type); }
+
+::highlight(variable) { color: var(--syntax-variable); }
+
+::highlight(property),
+::highlight(attr-name) { color: var(--syntax-property); }
+
+::highlight(tag) { color: var(--syntax-tag); }
+
+::highlight(selector) { color: var(--syntax-selector); }
