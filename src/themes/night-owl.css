@@ -13,6 +13,8 @@
   --syntax-property: light-dark(#4876d6, #82aaff);
   --syntax-tag: light-dark(#0c969b, #7fdbca);
   --syntax-selector: light-dark(#4876d6, #82aaff);
+  --syntax-inserted: light-dark(#c96765, #ecc48d);
+  --syntax-deleted: light-dark(#994cc3, #c792ea);
 
   color-scheme: light dark;
 }
@@ -57,6 +59,6 @@
 
 ::highlight(selector) { color: var(--syntax-selector); }
 
-::highlight(inserted) { color: var(--syntax-string); }
+::highlight(inserted) { color: var(--syntax-inserted); }
 
-::highlight(deleted) { color: var(--syntax-keyword); }
+::highlight(deleted) { color: var(--syntax-deleted); }

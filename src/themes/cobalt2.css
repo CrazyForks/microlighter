@@ -1,25 +1,25 @@
-/* Reference: Solarized by Ethan Schoonover (MIT) — https://github.com/altercation/solarized/blob/master/textmate-colors-solarized/Solarized%20%28light%29.tmTheme */
-[data-syntax-theme="solarized-light"] {
-  --syntax-background: light-dark(#fdf6e3, #002b36);
-  --syntax-foreground: light-dark(#657b83, #93a1a1);
-  --syntax-comment: light-dark(#93a1a1, #586e75);
-  --syntax-keyword: light-dark(#859900, #b8c927);
-  --syntax-operator: light-dark(#859900, #b8c927);
-  --syntax-string: light-dark(#2aa198, #58c7bd);
-  --syntax-constant: light-dark(#d33682, #e26aa5);
-  --syntax-function: light-dark(#268bd2, #5eb7e5);
-  --syntax-type: light-dark(#b58900, #d9b72f);
-  --syntax-variable: light-dark(#657b83, #93a1a1);
-  --syntax-property: light-dark(#268bd2, #5eb7e5);
-  --syntax-tag: light-dark(#268bd2, #5eb7e5);
-  --syntax-selector: light-dark(#268bd2, #5eb7e5);
-  --syntax-inserted: light-dark(#2aa198, #58c7bd);
-  --syntax-deleted: light-dark(#859900, #b8c927);
+/* Reference: Cobalt2 by Wes Bos (MIT) — https://github.com/wesbos/cobalt2-vscode/blob/master/theme/cobalt2.json */
+[data-syntax-theme="cobalt2"] {
+  --syntax-background: light-dark(#ffffff, #193549);
+  --syntax-foreground: light-dark(#193549, #ffffff);
+  --syntax-comment: light-dark(#006bbf, #0088ff);
+  --syntax-keyword: light-dark(#b85a00, #ff9d00);
+  --syntax-operator: light-dark(#7a6900, #ffee80);
+  --syntax-string: light-dark(#287a15, #a5ff90);
+  --syntax-constant: light-dark(#c51f5d, #ff628c);
+  --syntax-function: light-dark(#9b6500, #ffc600);
+  --syntax-type: light-dark(#b70068, #ff68b8);
+  --syntax-variable: light-dark(#193549, #e1efff);
+  --syntax-property: light-dark(#007878, #9effff);
+  --syntax-tag: light-dark(#007878, #9effff);
+  --syntax-selector: light-dark(#287a15, #3ad900);
+  --syntax-inserted: light-dark(#287a15, #a5ff90);
+  --syntax-deleted: light-dark(#c51f5d, #ff628c);
 
   color-scheme: light dark;
 }
 
-[data-syntax-theme="solarized-light"] pre:has(code) {
+[data-syntax-theme="cobalt2"] pre:has(code) {
   background-color: var(--syntax-background);
   color: var(--syntax-foreground);
 }

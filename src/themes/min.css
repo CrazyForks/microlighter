@@ -1,25 +1,25 @@
-/* Reference: Solarized by Ethan Schoonover (MIT) — https://github.com/altercation/solarized/blob/master/textmate-colors-solarized/Solarized%20%28light%29.tmTheme */
-[data-syntax-theme="solarized-light"] {
-  --syntax-background: light-dark(#fdf6e3, #002b36);
-  --syntax-foreground: light-dark(#657b83, #93a1a1);
-  --syntax-comment: light-dark(#93a1a1, #586e75);
-  --syntax-keyword: light-dark(#859900, #b8c927);
-  --syntax-operator: light-dark(#859900, #b8c927);
-  --syntax-string: light-dark(#2aa198, #58c7bd);
-  --syntax-constant: light-dark(#d33682, #e26aa5);
-  --syntax-function: light-dark(#268bd2, #5eb7e5);
-  --syntax-type: light-dark(#b58900, #d9b72f);
-  --syntax-variable: light-dark(#657b83, #93a1a1);
-  --syntax-property: light-dark(#268bd2, #5eb7e5);
-  --syntax-tag: light-dark(#268bd2, #5eb7e5);
-  --syntax-selector: light-dark(#268bd2, #5eb7e5);
-  --syntax-inserted: light-dark(#2aa198, #58c7bd);
-  --syntax-deleted: light-dark(#859900, #b8c927);
+/* Reference: Min Theme by Miguel Solorio (MIT) — https://github.com/miguelsolorio/min-theme/tree/master/themes */
+[data-syntax-theme="min"] {
+  --syntax-background: light-dark(#ffffff, #1f1f1f);
+  --syntax-foreground: light-dark(#24292e, #bbbbbb);
+  --syntax-comment: light-dark(#c2c3c5, #6b737c);
+  --syntax-keyword: light-dark(#d32f2f, #f97583);
+  --syntax-operator: light-dark(#24292e, #b392f0);
+  --syntax-string: light-dark(#22863a, #ffab70);
+  --syntax-constant: light-dark(#1976d2, #f8f8f8);
+  --syntax-function: light-dark(#6f42c1, #b392f0);
+  --syntax-type: light-dark(#6f42c1, #b392f0);
+  --syntax-variable: light-dark(#1976d2, #79b8ff);
+  --syntax-property: light-dark(#1976d2, #79b8ff);
+  --syntax-tag: light-dark(#22863a, #ffab70);
+  --syntax-selector: light-dark(#6f42c1, #b392f0);
+  --syntax-inserted: light-dark(#22863a, #85e89d);
+  --syntax-deleted: light-dark(#d32f2f, #f97583);
 
   color-scheme: light dark;
 }
 
-[data-syntax-theme="solarized-light"] pre:has(code) {
+[data-syntax-theme="min"] pre:has(code) {
   background-color: var(--syntax-background);
   color: var(--syntax-foreground);
 }

@@ -13,6 +13,8 @@
   --syntax-property: light-dark(#0550ae, #79c0ff);
   --syntax-tag: light-dark(#116329, #7ee787);
   --syntax-selector: light-dark(#8250df, #d2a8ff);
+  --syntax-inserted: light-dark(#116329, #7ee787);
+  --syntax-deleted: light-dark(#cf222e, #ff7b72);
 
   color-scheme: light dark;
 }
@@ -80,9 +82,9 @@
 }
 
 ::highlight(inserted) {
-  color: var(--syntax-tag);
+  color: var(--syntax-inserted);
 }
 
 ::highlight(deleted) {
-  color: var(--syntax-keyword);
+  color: var(--syntax-deleted);
 }
