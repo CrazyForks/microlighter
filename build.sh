@@ -3,12 +3,18 @@
 set -eu
 
 directory=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+dist="$directory/dist"
 bundle=$(mktemp "${TMPDIR:-/tmp}/microlighter.XXXXXX.js")
-output="$directory/microlighter.min.js"
+output="$dist/microlighter.min.js"
 
 trap 'rm -f "$bundle"' EXIT
 
-npx --yes rollup@4.46.2 "$directory/src/index.js" \
+# Populate dist/ with the hand-authored ESM source (no transpile needed).
+rm -rf "$dist"
+mkdir -p "$dist"
+cp -R "$directory/src/." "$dist/"
+
+npx --yes rollup@4.46.2 "$directory/src/microlighter.js" \
   --format esm \
   --file "$bundle" \
   --silent
@@ -20,7 +26,10 @@ npx --yes terser@5.43.1 "$bundle" \
   --comments false \
   --output "$output"
 
-gzip_size=$(gzip -9 -n -c "$output" | wc -c | tr -d ' ')
+# Vendor the built package into the docs/ site so GitHub Pages (source: /docs)
+# can serve a self-contained demo that loads the real distributable.
+rm -rf "$directory/docs/microlighter"
+mkdir -p "$directory/docs/microlighter"
+cp -R "$dist/." "$directory/docs/microlighter/"
 
-printf '%s: %s bytes\n' "$(basename "$output")" "$(wc -c < "$output" | tr -d ' ')"
-printf '%s gzip: %s bytes\n' "$(basename "$output")" "$gzip_size"
+node "$directory/scripts/report-size.mjs"

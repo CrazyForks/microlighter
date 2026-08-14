@@ -1,0 +1,36 @@
+name: Bug report
+description: Report something that isn't working
+labels: [bug]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug, including what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Ideally a minimal code block and the `lang` used.
+      placeholder: |
+        1. Markup: <pre lang="..."><code>...</code></pre>
+        2. Load microlighter via ...
+        3. See ...
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+      placeholder: e.g. Chrome 120
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: MicroLighter version
+      placeholder: e.g. 1.0.0
+    validations:
+      required: false

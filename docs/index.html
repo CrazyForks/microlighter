@@ -16,15 +16,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cascadia+Mono:wght@300;500;700&amp;display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./src/themes/index.css">
+  <link rel="stylesheet" href="./microlighter/themes/index.css">
   <style>
     * {
       box-sizing: border-box;
     }
 
     :root {
-      --page-bg: light-dark(#ffffff, #151515);
-      --page-fg: light-dark(#1f1f1f, #ececec);
+      --page-bg: color-mix(in srgb, var(--syntax-background, light-dark(#ffffff, #151515)) 97%, var(--page-fg));
+      --page-fg: var(--syntax-foreground, light-dark(#1f1f1f, #ececec));
       --page-muted: light-dark(#646464, #a3a3a3);
       --page-border: light-dark(#d4d4d4, #383838);
     }
@@ -228,7 +228,7 @@
 
     .size-specimen {
       display: flex;
-      align-items: baseline;
+      align-items: center;
       color: var(--syntax-keyword);
     }
 
@@ -429,7 +429,7 @@
       <article class="feature">
         <span class="feature-index" aria-hidden="true">02</span>
         <div class="feature-specimen size-specimen" aria-hidden="true">
-          <span class="size-value">1.98</span><span class="size-unit">kb<br>gzip</span>
+          <span class="size-value">2.03</span><span class="size-unit">kb<br>gzip</span>
         </div>
         <h2>Blazingly fast!!</h2>
       </article>
@@ -453,42 +453,17 @@
       </article>
     </section>
 
-    <section class="sample" aria-labelledby="css-label">
+    <section class="sample" aria-labelledby="markup-label">
       <div class="sample-label">
-        <h2 id="css-label">CSS</h2>
+        <h2 id="markup-label">Markup</h2>
       </div>
-      <pre lang="css"><code>/* Theme tokens and responsive component styles */
-@layer theme {
-  :root {
-    --brand-hue: 265;
-    --brand: oklch(68% 0.2 var(--brand-hue));
-    color-scheme: light dark;
-  }
-
-  .button:is(:hover, :focus-visible) {
-    color: #ffffff;
-    background: var(--brand);
-    border: 2px solid currentColor;
-  }
-
-  @media (width >= 48rem) {
-    .button {
-      padding-inline: 1.25rem;
-    }
-  }
-}</code></pre>
-    </section>
-
-    <section class="sample" aria-labelledby="html-label">
-      <div class="sample-label">
-        <h2 id="html-label">HTML + CSS + JS</h2>
-      </div>
-      <pre lang="html"><code>&lt;!-- External grammar includes inside HTML --&gt;
+      <pre lang="html"><code>&lt;!-- Nested CSS and JS get highlighted inside HTML --&gt;
 &lt;syntax-card data-syntax-theme="vscode-plus"&gt;
   &lt;template shadowrootmode="open"&gt;
     &lt;style&gt;
       :host {
         display: grid;
+        gap: 0.5rem;
         color: #f8f8f2;
         background: oklch(28% 0.04 275);
       }
@@ -499,55 +474,90 @@
     &lt;/button&gt;
   &lt;/template&gt;
 &lt;/syntax-card&gt;
-&lt;script&gt;
+&lt;script type="module"&gt;
+  import { highlightAll } from "microlighter";
+
   class SyntaxCard extends HTMLElement {
-    connectedCallback() {
+    async connectedCallback() {
       const button = this.querySelector("button");
-      button.addEventListener("click", () =&gt; true);
+      button.addEventListener("click", () =&gt; this.toggleAttribute("open"));
+      await highlightAll({ root: this });
     }
   }
 
   customElements.define("syntax-card", SyntaxCard);
-&lt;/script&gt;
-</code></pre>
+&lt;/script&gt;</code></pre>
+    </section>
+
+    <section class="sample" aria-labelledby="css-label">
+      <div class="sample-label">
+        <h2 id="css-label">CSS</h2>
+      </div>
+      <pre lang="css"><code>/* Load every bundled theme, then pick one on <html> */
+@import "microlighter/themes/index.css";
+
+/* Themes only paint the code blocks, not the whole page */
+pre:has(code) {
+  padding: clamp(1rem, 3vw, 2rem);
+  border-radius: 8px;
+  background-color: var(--syntax-background);
+  color: var(--syntax-foreground);
+}
+
+::highlight(keyword) {
+  color: var(--syntax-keyword);
+}
+
+::highlight(string) {
+  color: var(--syntax-string);
+}</code></pre>
+    </section>
+
+    <section class="sample" aria-labelledby="go-label">
+      <div class="sample-label">
+        <h2 id="go-label">Go</h2>
+      </div>
+      <pre lang="go"><code>package highlight
+
+import "fmt"
+
+// Token is a scoped span of source text.
+type Token struct {
+	Scope      string
+	Start, End int
+}
+
+// Tokenize splits source into scoped tokens.
+func Tokenize(source string, scopes []string) ([]Token, error) {
+	if len(scopes) == 0 {
+		return nil, fmt.Errorf("no scopes for %q", source)
+	}
+
+	tokens := make([]Token, 0, len(scopes))
+	for i, scope := range scopes {
+		tokens = append(tokens, Token{Scope: scope, Start: i})
+	}
+	return tokens, nil
+}</code></pre>
     </section>
 
     <section class="sample" aria-labelledby="javascript-label">
       <div class="sample-label">
         <h2 id="javascript-label">JavaScript</h2>
       </div>
-      <pre lang="javascript"><code>/* Begin/end regions, captures, and constants */
-class ThemeSwitcher extends HTMLElement {
-  connectedCallback() {
-    const selectedTheme = this.getAttribute("data-syntax-theme") ?? "github";
+      <pre lang="javascript"><code>/* Side-effect-free API: highlight when you're ready */
+import { highlightAll } from "microlighter";
 
-    if (selectedTheme === "vscode-plus") {
-      document.documentElement.dataset.syntaxTheme = selectedTheme;
-    }
+await highlightAll();
 
-    return true;
-  }
-}
+// Scope to part of the page, or use a custom selector
+await highlightAll({ root: document.querySelector("#docs") });
 
-customElements.define("theme-switcher", ThemeSwitcher);</code></pre>
-    </section>
-
-    <section class="sample" aria-labelledby="yaml-label">
-      <div class="sample-label">
-        <h2 id="yaml-label">YAML</h2>
-      </div>
-      <pre lang="yaml"><code>---
-title: "MicroLighter"
-published: true
-theme: &default-theme dracula
-fallback: *default-theme
-tags:
-  - css
-  - javascript
-description: |
-  A compact syntax gallery.
-count: 12
----</code></pre>
+// Re-highlight after injecting code in a SPA
+async function addSnippet(container, markup) {
+  container.insertAdjacentHTML("beforeend", markup);
+  await highlightAll({ root: container });
+}</code></pre>
     </section>
 
     <section class="sample" aria-labelledby="json-label">
@@ -556,48 +566,14 @@ count: 12
       </div>
       <pre lang="json"><code>{
   "name": "microlighter",
-  "private": true,
   "version": "1.0.0",
-  "themes": ["dracula", "monokai"],
-  "grammarCount": 9,
-  "fallback": null
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.js",
+    "./*": "./dist/*"
+  },
+  "sideEffects": ["./dist/microlighter.js", "./dist/microlighter.min.js"]
 }</code></pre>
-    </section>
-
-    <section class="sample" aria-labelledby="bash-label">
-      <div class="sample-label">
-        <h2 id="bash-label">Bash</h2>
-      </div>
-      <pre lang="bash"><code>#!/usr/bin/env bash
-
-THEME="dracula"
-
-if test -n "$THEME"; then
-  printf "Building %s\n" "$THEME"
-  bundle exec jekyll build --drafts | tee build.log
-else
-  echo "Choose a theme"
-fi</code></pre>
-    </section>
-
-    <section class="sample" aria-labelledby="ruby-label">
-      <div class="sample-label">
-        <h2 id="ruby-label">Ruby</h2>
-      </div>
-      <pre lang="ruby"><code>class SyntaxTheme
-  DEFAULT_THEME = :dracula
-
-  def initialize(name = DEFAULT_THEME)
-    @name = name
-  end
-
-  def label
-    "Theme: #{@name}"
-  end
-end
-
-theme = SyntaxTheme.new
-puts theme.label if theme</code></pre>
     </section>
 
     <section class="sample" aria-labelledby="markdown-label">
@@ -605,43 +581,205 @@ puts theme.label if theme</code></pre>
         <h2 id="markdown-label">Markdown</h2>
       </div>
       <pre lang="markdown"><code>---
-title: Highlight gallery
-published: true
+title: MicroLighter
+layout: doc
 ---
 
 # MicroLighter
 
-Pick a **syntax theme** and inspect the `Range` output.
+A tiny, **dependency-free** syntax highlighter built on the
+[CSS Custom Highlight API](https://developer.mozilla.org/).
 
-> Highlighting without DOM spans.
+## Install
 
-- [CSS Custom Highlight API](https://developer.mozilla.org/)
-- *Lazy-loaded* grammar modules
+    npm install microlighter
 
-```css
-.demo { color: rebeccapurple; }
-```</code></pre>
+Highlights *without* `&lt;span&gt;` soup — ranges live in `CSS.highlights`,
+and grammars are lazy-loaded on demand.
+
+&gt; Your markup stays clean; the color lives in CSS.</code></pre>
+    </section>
+
+    <section class="sample" aria-labelledby="python-label">
+      <div class="sample-label">
+        <h2 id="python-label">Python</h2>
+      </div>
+      <pre lang="python"><code>from dataclasses import dataclass
+
+
+@dataclass
+class Token:
+    """A highlighted range with a scope."""
+
+    scope: str
+    start: int
+    end: int = 0
+
+
+def tokenize(source: str, scopes: list[str]) -> list[Token]:
+    tokens = [Token(scope, i) for i, scope in enumerate(scopes)]
+    if not tokens:
+        raise ValueError("no scopes")
+    return sorted(tokens, key=lambda t: t.start)
+
+
+if __name__ == "__main__":
+    for token in tokenize("const x = 42", ["keyword", "number"]):
+        print(f"{token.scope}: {token.start}")</code></pre>
+    </section>
+
+    <section class="sample" aria-labelledby="ruby-label">
+      <div class="sample-label">
+        <h2 id="ruby-label">Ruby</h2>
+      </div>
+      <pre lang="ruby"><code># Jekyll hook: MicroLighter was extracted from a Jekyll site.
+# Rewrite fenced code blocks to carry a `lang` attribute so
+# MicroLighter can highlight them on the client.
+Jekyll::Hooks.register :documents, :post_render do |doc|
+  next unless doc.output_ext == ".html"
+
+  doc.output = doc.output.gsub(
+    /&lt;pre&gt;&lt;code class="language-(\w+)"&gt;/,
+    '&lt;pre lang="\1"&gt;&lt;code&gt;'
+  )
+end</code></pre>
+    </section>
+
+    <section class="sample" aria-labelledby="rust-label">
+      <div class="sample-label">
+        <h2 id="rust-label">Rust</h2>
+      </div>
+      <pre lang="rust"><code>use std::collections::HashMap;
+
+/// A scoped span of source text.
+#[derive(Debug, Clone)]
+struct Token&lt;'a&gt; {
+    scope: &amp;'a str,
+    start: usize,
+    end: usize,
+}
+
+fn tokenize&lt;'a&gt;(source: &amp;'a str, scopes: &amp;[&amp;'a str]) -> Result&lt;Vec&lt;Token&lt;'a&gt;&gt;, String&gt; {
+    if scopes.is_empty() {
+        return Err(format!("no scopes for {source:?}"));
+    }
+
+    let mut counts: HashMap&lt;&amp;str, u32&gt; = HashMap::new();
+    let tokens = scopes
+        .iter()
+        .enumerate()
+        .map(|(i, &amp;scope)| {
+            *counts.entry(scope).or_insert(0) += 1;
+            Token { scope, start: i, end: i + 1 }
+        })
+        .collect();
+    Ok(tokens)
+}</code></pre>
     </section>
 
     <section class="sample" aria-labelledby="scss-label">
       <div class="sample-label">
         <h2 id="scss-label">SCSS</h2>
       </div>
-      <pre lang="scss"><code>$space: 1rem;
-$accent: #c0ffee;
+      <pre lang="scss"><code>// Author a MicroLighter theme from a token map
+$tokens: (
+  background: #011627,
+  foreground: #d6deeb,
+  keyword: #c792ea,
+  string: #ecc48d
+);
 
-@mixin stack($gap: $space) {
-  display: grid;
-  gap: $gap;
+@mixin syntax-theme($name, $tokens) {
+  [data-syntax-theme="#{$name}"] {
+    @each $token, $value in $tokens {
+      --syntax-#{$token}: #{$value};
+    }
+  }
 }
 
-.card {
-  @include stack;
+@include syntax-theme("night-owl", $tokens);</code></pre>
+    </section>
 
-  &:hover {
-    color: $accent;
+    <section class="sample" aria-labelledby="shell-label">
+      <div class="sample-label">
+        <h2 id="shell-label">Shell</h2>
+      </div>
+      <pre lang="bash"><code>#!/usr/bin/env bash
+set -euo pipefail
+
+# Build the dist/ bundle and print a size report
+npm run build
+
+# Rebuild, then run the Playwright end-to-end tests
+npm test
+
+# Refresh the gzip figure on the docs homepage
+npm run docs:update-homepage-stats</code></pre>
+    </section>
+
+    <section class="sample" aria-labelledby="typescript-label">
+      <div class="sample-label">
+        <h2 id="typescript-label">TypeScript</h2>
+      </div>
+      <pre lang="typescript"><code>import { highlightAll } from "microlighter";
+
+/** A scoped span of source text. */
+interface Token&lt;T = string&gt; {
+  readonly scope: T;
+  start: number;
+  end?: number;
+}
+
+type Scopes = ReadonlyMap&lt;string, number&gt;;
+
+enum Kind {
+  Keyword,
+  String,
+}
+
+export class Tokenizer implements Iterable&lt;Token&gt; {
+  #tokens: Token[] = [];
+
+  constructor(private readonly source: string) {}
+
+  tokenize(scopes: readonly string[]): Token[] {
+    return scopes
+      .map((scope, i): Token =&gt; ({ scope, start: i }))
+      .filter((token) =&gt; token.start &gt;= 0);
   }
-}</code></pre>
+
+  *[Symbol.iterator](): Iterator&lt;Token&gt; {
+    yield* this.#tokens;
+  }
+}
+
+const answer = 42 as const;
+await highlightAll();</code></pre>
+    </section>
+
+    <section class="sample" aria-labelledby="yaml-label">
+      <div class="sample-label">
+        <h2 id="yaml-label">YAML</h2>
+      </div>
+      <pre lang="yaml"><code># .github/workflows/ci.yml
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm test</code></pre>
     </section>
   </main>
 
@@ -676,7 +814,7 @@ $accent: #c0ffee;
     };
 
     const selectedThemeCode = async () => {
-      const response = await fetch(`./src/themes/${themeSelect.value}.css`);
+      const response = await fetch(`./microlighter/themes/${themeSelect.value}.css`);
 
       if (!response.ok) throw new Error("Unable to load theme CSS");
 
@@ -709,6 +847,6 @@ $accent: #c0ffee;
       themeCodeDialog.close();
     });
   </script>
-  <script type="module" src="./src/index.js"></script>
+  <script type="module" src="./microlighter/microlighter.js"></script>
 </body>
 </html>

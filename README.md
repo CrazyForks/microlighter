@@ -1,34 +1,71 @@
 # MicroLighter
 
+[![CI](https://github.com/davatron5000/microlighter/actions/workflows/ci.yml/badge.svg)](https://github.com/davatron5000/microlighter/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
+
 A tiny, dependency-free syntax highlighter for the web. MicroLighter uses the
 [CSS Custom Highlight API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API)
 and TextMate grammars to colorize code **without** wrapping every token in a
 `<span>`. Your markup stays clean; the highlighting lives entirely in the
 highlight registry and CSS.
 
-## How it works
+## Usage
 
-Mark up code blocks with a `lang` attribute on the `<pre>`:
+MicroLighter ships in three flavors so you can pick the right trade-off between
+convenience and control. In every case, mark up code blocks with a `lang`
+attribute on the `<pre>`:
 
 ```html
 <pre lang="javascript"><code>const answer = 42;</code></pre>
 ```
 
-Then load the module. It scans the page for `pre[lang] > code`, lazily imports
-only the grammars it needs, tokenizes each block, and registers ranges with
-`CSS.highlights`.
+### 1. Auto (drop-in)
+
+The auto-run entry (`microlighter/microlighter.js`, or the minified
+`microlighter/microlighter.min.js`) runs on import: it scans the page for
+`pre[lang] > code`, lazily imports only the grammars it needs, tokenizes each
+block, registers ranges with `CSS.highlights`, and re-highlights whenever a
+`syntax-highlight` event fires.
 
 ```html
 <body data-syntax-theme="github">
 <link rel="stylesheet" href="./src/themes/github.css">
-<script type="module" src="./src/index.js"></script>
+<script type="module" src="./src/microlighter.js"></script>
 ```
 
-To re-highlight after dynamically adding code (e.g. in a SPA), dispatch a
-`syntax-highlight` event:
+To re-highlight after dynamically adding code (e.g. in a SPA):
 
 ```js
 document.dispatchEvent(new Event("syntax-highlight"));
+```
+
+### 2. Programmatic (side-effect-free)
+
+The default entry (`microlighter`) exports `highlightAll()` and does **nothing**
+on import, so it's tree-shakeable and safe to pull into a bundler. Call it when
+you're ready:
+
+```js
+import { highlightAll } from "microlighter";
+
+await highlightAll();
+
+// Scope to part of the page, or use a custom selector:
+await highlightAll({ root: document.querySelector("#docs") });
+await highlightAll({ selector: "pre.code > code" });
+```
+
+The low-level tokenizer is also available on its own via
+`microlighter/highlight.js` if you want to drive grammar resolution yourself.
+
+### 3. CDN / single file
+
+`microlighter/microlighter.min.js` is a prebuilt, minified single-file bundle of
+the auto runner (~2 KiB gzip) with no separate grammar requests inlined —
+grammars and themes are still fetched on demand:
+
+```html
+<script type="module" src="https://cdn.example.com/microlighter/microlighter.min.js"></script>
 ```
 
 ## Themes
@@ -54,26 +91,76 @@ Bundled themes:
 ## Languages
 
 Grammars ship as ES modules in `src/grammars/` and are loaded on demand:
-`bash`, `css`, `html`, `javascript`, `json`, `markdown`, `ruby`, `scss`, `yaml`.
-Common aliases (`js`, `ts`, `sh`, `yml`, `rb`, `md`, `sass`, …) resolve
-automatically.
+`bash`, `css`, `go`, `html`, `javascript`, `json`, `markdown`, `python`, `ruby`,
+`rust`, `scss`, `typescript`, `yaml`. Common aliases (`js`, `ts`, `sh`, `yml`,
+`rb`, `md`, `sass`, `py`, `rs`, …) resolve automatically.
 
 ## Build
 
-Produce the minified single-file bundle (`microlighter.min.js`):
+Produce the distributable `dist/` folder (copied ESM source plus the minified
+single-file bundle `dist/microlighter.min.js`):
 
 ```sh
 npm run build
 ```
 
-## Demo
-
-Open `demo.html` in a browser (served over HTTP so ES module imports resolve),
-for example:
+The build prints a size report: raw / gzip / brotli for the shipped bundle, a
+raw / minified / gzip breakdown of every lazily-loaded grammar and theme, and an
+average size per category (grammars vs. themes). It fails if the bundle's gzip
+size exceeds the `sizeLimit` in `package.json`. Run the report on its own anytime
+with:
 
 ```sh
-npx serve .
+npm run size
 ```
+
+## Tests
+
+End-to-end tests drive the demo site (`docs/index.html`) in a real browser
+(system Chrome) with Playwright and assert that highlight ranges register, the
+core token categories are present, and theme switching re-highlights cleanly:
+
+```sh
+npm test
+```
+
+`npm test` first rebuilds `dist/` (and the vendored `docs/microlighter/`) so tests
+run against current code. Updating the headline gzip size on the demo homepage
+(`docs/index.html`) is a separate, explicit step — it is never done automatically:
+
+```sh
+npm run docs:update-homepage-stats
+```
+
+This rebuilds the bundle and writes the current gzip size into the homepage. Plain
+`npm run size` is read-only and never edits the homepage.
+
+## Demo
+
+The demo lives in `docs/` as a self-contained static site: `docs/index.html`
+loads a vendored copy of the built package from `docs/microlighter/` (refreshed
+by `npm run build`). Serve the `docs/` folder over HTTP so ES module imports
+resolve:
+
+```sh
+npm run build   # populates docs/microlighter/
+npx serve docs
+```
+
+### Publishing to GitHub Pages
+
+Because `docs/` is self-contained, you can host it with **GitHub Pages** with no
+`gh-pages` branch: in **Settings → Pages**, set the source to **Deploy from a
+branch**, pick your default branch and the **`/docs`** folder. Pages serves
+`docs/index.html` at the site root, so the relative `./microlighter/…` asset
+paths resolve correctly. (Pages on a private repo requires a paid plan or making
+the repo public.)
+
+## Contributing
+
+Contributions are welcome — new grammars, themes, bug fixes, and docs. See
+[CONTRIBUTING.md](./CONTRIBUTING.md) for the dev setup, project layout, and how
+to add a grammar or theme.
 
 ## Prior art
 

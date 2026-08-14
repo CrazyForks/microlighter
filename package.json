@@ -4,25 +4,35 @@
   "private": true,
   "description": "A tiny, dependency-free syntax highlighter built on the CSS Custom Highlight API and TextMate grammars.",
   "type": "module",
-  "main": "./src/index.js",
-  "module": "./src/index.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "exports": {
-    ".": "./src/index.js",
-    "./highlighter": "./src/highlighter.js",
-    "./min": "./microlighter.min.js",
-    "./grammars/*": "./src/grammars/*.js",
-    "./themes/*": "./src/themes/*.css"
+    ".": "./dist/index.js",
+    "./*": "./dist/*"
   },
   "files": [
-    "src",
-    "microlighter.min.js"
+    "dist"
   ],
   "sideEffects": [
-    "./src/index.js",
-    "./microlighter.min.js"
+    "./dist/microlighter.js",
+    "./dist/microlighter.min.js"
   ],
+  "sizeLimit": {
+    "dist/microlighter.min.js": 3000
+  },
   "scripts": {
-    "build": "./build.sh"
+    "build": "./build.sh",
+    "size": "node scripts/report-size.mjs",
+    "pretest": "./build.sh",
+    "test": "playwright test",
+    "docs:update-homepage-stats": "./build.sh && node scripts/report-size.mjs --update-homepage",
+    "prepack": "./build.sh"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "keywords": [
     "syntax-highlighting",
