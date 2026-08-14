@@ -1,7 +1,6 @@
 {
   "name": "microlighter",
   "version": "1.0.0",
-  "private": true,
   "description": "A tiny, dependency-free syntax highlighter built on the CSS Custom Highlight API and TextMate grammars.",
   "type": "module",
   "main": "./dist/index.js",
