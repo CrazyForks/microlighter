@@ -53,6 +53,20 @@ test.describe("MicroLighter demo site (docs/index.html)", () => {
     expect(after.total).toBe(before.total);
   });
 
+  test("removes stale ranges when code blocks disappear", async ({ page }) => {
+    await page.goto("/", { waitUntil: "networkidle" });
+
+    await page.evaluate(async () => {
+      document.querySelectorAll("pre[lang] > code").forEach(code => code.remove());
+      const { highlightAll } = await import("/microlighter/index.js");
+      await highlightAll();
+    });
+
+    const { categories, total } = await readHighlights(page);
+    expect(categories).toEqual([]);
+    expect(total).toBe(0);
+  });
+
   test("highlights every non-empty code block, including python, go, rust, and typescript", async ({ page }) => {
     await page.goto("/", { waitUntil: "networkidle" });
 

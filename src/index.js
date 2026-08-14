@@ -1,7 +1,5 @@
 import { highlight } from "./highlight.js";
 
-export { highlight };
-
 const aliases = {
   golang: "go",
   htm: "html",
@@ -86,8 +84,8 @@ const externalIncludesFor = (value, includes = new Set()) => {
  * @returns {Promise<HTMLElement[]>} The highlighted code elements.
  */
 export const highlightAll = async ({ root = document, selector = "pre[lang] > code" } = {}) => {
-  const blocks = () => [...root.querySelectorAll(selector)];
-  const languages = [...new Set(blocks().map(languageFor))]
+  const codeBlocks = [...root.querySelectorAll(selector)];
+  const languages = [...new Set(codeBlocks.map(languageFor))]
     .filter(language => /^[a-z0-9_-]+$/.test(language));
 
   let pendingLanguages = languages;
@@ -105,7 +103,6 @@ export const highlightAll = async ({ root = document, selector = "pre[lang] > co
   }));
   const grammars = Object.fromEntries(grammarEntries.filter(([, grammar]) => grammar));
 
-  const codeBlocks = blocks();
   highlight(codeBlocks, code => grammars[languageFor(code)], grammarsByScope);
   return codeBlocks;
 };
