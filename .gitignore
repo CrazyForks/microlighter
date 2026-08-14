@@ -1,5 +1,6 @@
 node_modules/
 dist/
+docs/microlighter/
 test-results/
 playwright-report/
 *.log

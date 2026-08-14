@@ -124,8 +124,8 @@ core token categories are present, and theme switching re-highlights cleanly:
 npm test
 ```
 
-`npm test` first rebuilds `dist/` (and the vendored `docs/microlighter/`) so tests
-run against current code. Updating the headline gzip size on the demo homepage
+`npm test` first rebuilds `dist/` and the generated `docs/microlighter/` copy so
+tests run against current code. Updating the headline gzip size on the demo homepage
 (`docs/index.html`) is a separate, explicit step — it is never done automatically:
 
 ```sh
@@ -137,9 +137,9 @@ This rebuilds the bundle and writes the current gzip size into the homepage. Pla
 
 ## Demo
 
-The demo lives in `docs/` as a self-contained static site: `docs/index.html`
-loads a vendored copy of the built package from `docs/microlighter/` (refreshed
-by `npm run build`). Serve the `docs/` folder over HTTP so ES module imports
+The demo lives in `docs/` as a self-contained static site. `npm run build`
+generates a git-ignored copy of the package in `docs/microlighter/`, which
+`docs/index.html` loads. Serve the `docs/` folder over HTTP so ES module imports
 resolve:
 
 ```sh
@@ -149,12 +149,10 @@ npx serve docs
 
 ### Publishing to GitHub Pages
 
-Because `docs/` is self-contained, you can host it with **GitHub Pages** with no
-`gh-pages` branch: in **Settings → Pages**, set the source to **Deploy from a
-branch**, pick your default branch and the **`/docs`** folder. Pages serves
-`docs/index.html` at the site root, so the relative `./microlighter/…` asset
-paths resolve correctly. (Pages on a private repo requires a paid plan or making
-the repo public.)
+The CI workflow builds and tests the package, uploads the generated `docs/`
+directory as a Pages artifact, and deploys it on pushes to `main`. This keeps
+the package copy out of Git while avoiding a second build or a `gh-pages`
+branch. In **Settings → Pages**, set the source to **GitHub Actions**.
 
 ## Contributing
 

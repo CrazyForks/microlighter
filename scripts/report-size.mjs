@@ -114,7 +114,7 @@ const bundle = "dist/microlighter.min.js";
 const bundleSizes = sizesFor(bundle);
 
 printTable(
-  "Bundle (shipped as ./min)",
+  "Bundle (microlighter.min.js)",
   [[bundle, kib(bundleSizes.raw), kib(bundleSizes.gzip), kib(bundleSizes.brotli)]],
   ["file", "raw", "gzip", "brotli"]
 );
