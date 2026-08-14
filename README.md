@@ -118,10 +118,18 @@ Bundled themes:
 ## Languages
 
 Grammars ship as ES modules in `src/grammars/` and are loaded on demand:
-`bash`, `css`, `git-diff`, `go`, `html`, `javascript`, `json`, `markdown`,
-`python`, `ruby`, `rust`, `scss`, `typescript`, `yaml`. Common aliases (`js`,
-`ts`, `sh`, `yml`, `rb`, `md`, `diff`, `patch`, `sass`, `py`, `rs`, …) resolve
-automatically.
+`assembly`, `bash`, `c`, `cpp`, `csharp`, `css`, `dart`, `dockerfile`, `git-diff`,
+`go`, `graphql`, `html`, `java`, `javascript`, `json`, `kotlin`, `lua`, `markdown`,
+`objective-c`, `perl`, `php`, `powershell`, `python`, `r`, `ruby`, `rust`, `scss`,
+`sql`, `swift`, `toml`, `tsx`, `typescript`, `yaml`. `tsx` is a genuine grammar
+(TypeScript constructs plus JSX), not just an alias to `typescript`. `objective-c`
+reuses the shared `c` grammar's comments, preprocessor, and strings via external
+includes. `assembly` targets generic x86 Intel/NASM syntax. Common aliases (`js`,
+`jsx`, `ts`, `sh`, `shell`, `zsh`, `yml`, `rb`, `md`, `diff`, `patch`, `sass`, `py`,
+`rs`, `c++`, `cc`, `cxx`, `h`, `hpp`, `cs`, `kt`, `kts`, `ps1`, `pwsh`, `gql`,
+`docker`, `xml`, `svg`, `webmanifest`, `objc`, `objectivec`, `obj-c`, `asm`,
+`nasm`, `x86asm`, `pl`, …) resolve automatically — `xml` and `svg` reuse the
+HTML grammar and `webmanifest` reuses JSON.
 
 ## Build
 

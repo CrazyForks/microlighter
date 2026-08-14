@@ -25,7 +25,9 @@ export default defineConfig({
     }
   ],
   webServer: {
-    command: `npx --yes serve@14 -l ${PORT} docs`,
+    // Serve the whole repo root so tests can reach both the published demo
+    // (docs/) and the unpublished exhaustive grammar fixture (test/fixtures/).
+    command: `npx --yes serve@14 -l ${PORT} .`,
     url: `http://localhost:${PORT}/`,
     reuseExistingServer: !process.env.CI,
     timeout: 60_000

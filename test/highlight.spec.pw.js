@@ -1,4 +1,14 @@
+import { readdirSync } from "node:fs";
 import { test, expect } from "@playwright/test";
+
+// Playwright serves the whole repo root (see playwright.config.js), so the
+// published demo lives under /docs/ and its module graph resolves from
+// /docs/microlighter/*.js (the build.sh output copy), not /microlighter/*.js.
+const HOMEPAGE = "/docs/";
+
+const canonicalGrammars = readdirSync(new URL("../src/grammars", import.meta.url))
+  .map(file => file.replace(/\.js$/, ""))
+  .sort();
 
 /**
  * Read the live CSS Custom Highlight registry state from the page.
@@ -16,7 +26,7 @@ const readHighlights = page =>
 
 test.describe("MicroLighter demo site (docs/index.html)", () => {
   test("registers highlight ranges across every code block", async ({ page }) => {
-    await page.goto("/", { waitUntil: "networkidle" });
+    await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
 
     const { categories, total, blocks } = await readHighlights(page);
 
@@ -26,7 +36,7 @@ test.describe("MicroLighter demo site (docs/index.html)", () => {
   });
 
   test("exposes the core token categories", async ({ page }) => {
-    await page.goto("/", { waitUntil: "networkidle" });
+    await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
 
     const { categories } = await readHighlights(page);
 
@@ -36,10 +46,10 @@ test.describe("MicroLighter demo site (docs/index.html)", () => {
   });
 
   test("maps TextMate scopes to stable semantic categories", async ({ page }) => {
-    await page.goto("/", { waitUntil: "networkidle" });
+    await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
 
     const actual = await page.evaluate(async () => {
-      const { highlight } = await import("/microlighter/highlight.js");
+      const { highlight } = await import("/docs/microlighter/highlight.js");
       const mappings = [
         ["comment.block.html", "comment"],
         ["markup.quote", "quote"],
@@ -142,43 +152,47 @@ test.describe("MicroLighter demo site (docs/index.html)", () => {
     expect(actual).toEqual(expected);
   });
 
-  test("highlights inserted and deleted git diff lines", async ({ page }) => {
-    await page.goto("/", { waitUntil: "networkidle" });
+  test("re-highlights after switching themes via the syntax-highlight event", async ({ page }) => {
+    await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
 
-    const diffHighlights = await page.evaluate(() => {
-      const linesFor = category => [...CSS.highlights.get(category) ?? []]
-        .filter(range => range.startContainer.parentElement?.closest("code.language-git-diff"))
-        .map(range => range.toString());
+    const before = await readHighlights(page);
 
-      return {
-        inserted: linesFor("inserted"),
-        deleted: linesFor("deleted"),
-        keywords: linesFor("keyword")
-      };
+    await page.evaluate(() => {
+      document.documentElement.dataset.syntaxTheme = "dracula";
+      document.dispatchEvent(new Event("syntax-highlight"));
     });
+    await page.waitForTimeout(200);
 
-    expect(diffHighlights.inserted).toEqual(expect.arrayContaining([
-      '+  diff: "git-diff",',
-      '+  html: "html",'
-    ]));
-    expect(diffHighlights.deleted).toContain('-  htm: "html",');
-    expect(diffHighlights.keywords).toEqual([]);
+    const theme = await page.evaluate(() => document.documentElement.dataset.syntaxTheme);
+    const after = await readHighlights(page);
+
+    expect(theme).toBe("dracula");
+    expect(after.total).toBe(before.total);
   });
 
   test("loads every bundled theme without changing highlight ranges", async ({ page }) => {
-    await page.goto("/", { waitUntil: "networkidle" });
+    await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
 
     const before = await readHighlights(page);
     const themes = await page.locator("#theme option").evaluateAll(options =>
       options.map(option => option.value)
     );
 
+    expect(themes).toEqual(expect.arrayContaining([
+      "github", "vscode-plus", "dracula", "monokai", "night-owl",
+      "solarized-light", "vesper", "min", "cobalt2", "tokyo-night"
+    ]));
+
     for (const theme of themes) {
       await page.selectOption("#theme", theme);
 
       const styles = await page.evaluate(() => {
         const root = getComputedStyle(document.documentElement);
-        const code = getComputedStyle(document.querySelector("pre[lang]"));
+        // Find a live, currently-rendered code block robustly: one of the
+        // curated static samples is always present, regardless of which
+        // playground language happens to be selected.
+        const pre = document.querySelector("pre > code[class*='language-']")?.closest("pre");
+        const code = getComputedStyle(pre);
         return {
           theme: document.documentElement.dataset.syntaxTheme,
           background: root.getPropertyValue("--syntax-background").trim(),
@@ -199,51 +213,8 @@ test.describe("MicroLighter demo site (docs/index.html)", () => {
     }
   });
 
-  test("removes stale ranges when code blocks disappear", async ({ page }) => {
-    await page.goto("/", { waitUntil: "networkidle" });
-
-    await page.evaluate(() => {
-      document.querySelectorAll("pre > code").forEach(code => code.remove());
-      document.dispatchEvent(new Event("syntax-highlight"));
-    });
-
-    await expect.poll(() => readHighlights(page)).toMatchObject({
-      categories: [],
-      total: 0
-    });
-  });
-
-  test("highlights every non-empty code block, including python, go, rust, and typescript", async ({ page }) => {
-    await page.goto("/", { waitUntil: "networkidle" });
-
-    const { langs, unhighlighted } = await page.evaluate(() => {
-      const highlighted = new Set();
-      for (const highlight of CSS.highlights.values()) {
-        for (const range of highlight) {
-          const code = range.startContainer.parentElement?.closest("pre > code");
-          if (code) highlighted.add(code);
-        }
-      }
-
-      const blocks = [...document.querySelectorAll("pre > code[class*='language-']")]
-        .filter(code => code.textContent.trim().length > 0);
-
-      return {
-        langs: [...new Set(blocks.map(code => [...code.classList]
-          .find(className => className.startsWith("language-"))
-          .slice("language-".length)))],
-        unhighlighted: blocks
-          .filter(code => !highlighted.has(code))
-          .map(code => code.className)
-      };
-    });
-
-    expect(langs).toEqual(expect.arrayContaining(["python", "go", "rust", "typescript"]));
-    expect(unhighlighted).toEqual([]);
-  });
-
   test("supports standard classes, data attributes, and deprecated lang attributes", async ({ page }) => {
-    await page.goto("/", { waitUntil: "networkidle" });
+    await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
 
     const highlighted = await page.evaluate(async () => {
       const fixtures = [
@@ -274,6 +245,32 @@ test.describe("MicroLighter demo site (docs/index.html)", () => {
     ]));
   });
 
+  test("removes stale ranges when code blocks disappear", async ({ page }) => {
+    await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
+
+    await page.evaluate(() => {
+      document.querySelectorAll("pre > code[class*='language-']").forEach(code => code.remove());
+      document.dispatchEvent(new Event("syntax-highlight"));
+    });
+
+    await expect.poll(() => readHighlights(page)).toMatchObject({
+      categories: [],
+      total: 0
+    });
+  });
+
+  test("curates exactly six full static language samples", async ({ page }) => {
+    await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
+
+    const sampleLanguages = await page.evaluate(() =>
+      [...document.querySelectorAll("section.sample:not(.playground) > pre > code[class*='language-']")]
+        .map(code => [...code.classList]
+          .find(className => className.startsWith("language-"))
+          .slice("language-".length)));
+
+    expect(sampleLanguages).toEqual(["html", "markdown", "python", "sql", "cpp", "tsx"]);
+  });
+
   test("loads without runtime errors", async ({ page }) => {
     const errors = [];
     page.on("pageerror", error => errors.push(String(error)));
@@ -286,9 +283,109 @@ test.describe("MicroLighter demo site (docs/index.html)", () => {
       errors.push(message.text());
     });
 
-    await page.goto("/", { waitUntil: "networkidle" });
+    await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
     await page.waitForTimeout(200);
 
     expect(errors).toEqual([]);
+  });
+});
+
+test.describe("Supported languages index", () => {
+  test("lists every canonical grammar grouped by category", async ({ page }) => {
+    await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
+
+    const listed = await page.evaluate(() =>
+      [...document.querySelectorAll(".language-index [data-lang]")].map(item => item.dataset.lang));
+
+    expect(listed.sort()).toEqual(canonicalGrammars);
+    expect(new Set(listed).size).toBe(listed.length);
+  });
+
+  test("organizes languages into meaningful, labeled groups", async ({ page }) => {
+    await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
+
+    const groups = await page.evaluate(() =>
+      [...document.querySelectorAll(".language-group")].map(group => ({
+        name: group.querySelector("h3")?.textContent.trim(),
+        languages: [...group.querySelectorAll("[data-lang]")].map(item => item.dataset.lang)
+      })));
+
+    const byName = Object.fromEntries(groups.map(group => [group.name, group.languages]));
+
+    expect(Object.keys(byName).length).toBeGreaterThanOrEqual(4);
+    // Formats and markup/styling languages aren't shoved into "programming".
+    expect(byName["Web"]).toEqual(expect.arrayContaining(["html", "css", "scss"]));
+    expect(byName["Data, config & docs"]).toEqual(expect.arrayContaining(["git-diff", "toml", "yaml"]));
+  });
+});
+
+test.describe("Language playground", () => {
+  test("defaults to a language not already shown as a static sample", async ({ page }) => {
+    await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
+
+    const staticSamples = ["html", "markdown", "python", "sql", "cpp", "tsx"];
+    const selected = await page.locator("#playground-language").inputValue();
+
+    expect(staticSamples).not.toContain(selected);
+
+    const renderedLang = await page.evaluate(() => {
+      const code = document.querySelector("#playground-output code[class*='language-']");
+      return [...code.classList]
+        .find(className => className.startsWith("language-"))
+        .slice("language-".length);
+    });
+    expect(renderedLang).toBe(selected);
+  });
+
+  test("keeps every language sample inert until selected", async ({ page }) => {
+    await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
+
+    const { liveCount, templateCount, templatesInLiveDom } = await page.evaluate(() => ({
+      liveCount: document.querySelectorAll("#playground-output code[class*='language-']").length,
+      templateCount: document.querySelectorAll(".playground-body > template").length,
+      // Template contents never render into the live document by themselves.
+      templatesInLiveDom: document.querySelectorAll(".playground-body > template pre").length
+    }));
+
+    expect(liveCount).toBe(1);
+    expect(templateCount).toBeGreaterThan(10);
+    expect(templatesInLiveDom).toBe(0);
+  });
+
+  test("renders exactly one sample at a time and lazily highlights the new selection", async ({ page }) => {
+    await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
+
+    await page.selectOption("#playground-language", "rust");
+    await expect(page.locator("#playground-output code[class*='language-']")).toHaveCount(1);
+    await expect(page.locator("#playground-output code.language-rust")).toHaveCount(1);
+
+    const rustHighlighted = await page.evaluate(() => {
+      const code = document.querySelector("#playground-output code.language-rust");
+      for (const highlight of CSS.highlights.values()) {
+        for (const range of highlight) {
+          if (range.startContainer.parentElement?.closest("#playground-output pre > code") === code) return true;
+        }
+      }
+      return false;
+    });
+    expect(rustHighlighted).toBe(true);
+
+    await page.selectOption("#playground-language", "yaml");
+    await expect(page.locator("#playground-output code[class*='language-']")).toHaveCount(1);
+    await expect(page.locator("#playground-output code.language-yaml")).toHaveCount(1);
+    await expect(page.locator("#playground-output code.language-rust")).toHaveCount(0);
+  });
+
+  test("select options cover every canonical grammar with a readable label", async ({ page }) => {
+    await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
+
+    const options = await page.evaluate(() =>
+      [...document.querySelectorAll("#playground-language option")].map(option => ({
+        value: option.value,
+        label: option.textContent.trim()
+      })));
+
+    expect(options.map(option => option.value).sort()).toEqual(canonicalGrammars);
+    expect(options.every(option => option.label.length > 0)).toBe(true);
   });
 });
