@@ -1,3 +1,4 @@
+/* Reference: VS Code Monokai (MIT; Monokai by Wimer Hazenberg) — https://github.com/microsoft/vscode/blob/main/extensions/theme-monokai/themes/monokai-color-theme.json */
 [data-syntax-theme="monokai"] {
   --syntax-background: light-dark(#ffffff, #272822);
   --syntax-foreground: light-dark(#272822, #f8f8f2);

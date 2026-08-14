@@ -1,3 +1,4 @@
+/* Reference: Solarized by Ethan Schoonover (MIT) — https://github.com/altercation/solarized/blob/master/textmate-colors-solarized/Solarized%20%28light%29.tmTheme */
 [data-syntax-theme="solarized-light"] {
   --syntax-background: light-dark(#fdf6e3, #002b36);
   --syntax-foreground: light-dark(#657b83, #93a1a1);

@@ -24,7 +24,7 @@
     "build": "./build.sh",
     "size": "node scripts/report-size.mjs",
     "pretest": "./build.sh",
-    "test": "playwright test",
+    "test": "node --test test/*.spec.js && playwright test",
     "docs:update-homepage-stats": "./build.sh && node scripts/report-size.mjs --update-homepage",
     "prepack": "./build.sh"
   },

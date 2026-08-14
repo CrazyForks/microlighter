@@ -1,3 +1,4 @@
+/* Reference: Dracula Theme (MIT) — https://github.com/dracula/visual-studio-code/blob/main/src/dracula.yml */
 [data-syntax-theme="dracula"] {
   --syntax-background: light-dark(#ffffff, #282a36);
   --syntax-foreground: light-dark(#282a36, #f8f8f2);

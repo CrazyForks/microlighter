@@ -1,3 +1,4 @@
+// Reference: Microsoft VS Code (MIT) — https://github.com/microsoft/vscode/blob/main/extensions/scss/syntaxes/scss.tmLanguage.json
 export default {
   scopeName: "source.scss",
   patterns: [
