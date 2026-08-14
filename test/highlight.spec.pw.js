@@ -10,7 +10,7 @@ const readHighlights = page =>
     return {
       categories: [...CSS.highlights.keys()].sort(),
       total,
-      blocks: document.querySelectorAll("pre[lang] > code").length
+      blocks: document.querySelectorAll("pre > code[class*='language-']").length
     };
   });
 
@@ -40,7 +40,7 @@ test.describe("MicroLighter demo site (docs/index.html)", () => {
 
     const diffHighlights = await page.evaluate(() => {
       const linesFor = category => [...CSS.highlights.get(category) ?? []]
-        .filter(range => range.startContainer.parentElement?.closest("pre[lang='git-diff']"))
+        .filter(range => range.startContainer.parentElement?.closest("code.language-git-diff"))
         .map(range => range.toString());
 
       return {
@@ -80,7 +80,7 @@ test.describe("MicroLighter demo site (docs/index.html)", () => {
     await page.goto("/", { waitUntil: "networkidle" });
 
     await page.evaluate(() => {
-      document.querySelectorAll("pre[lang] > code").forEach(code => code.remove());
+      document.querySelectorAll("pre > code").forEach(code => code.remove());
       document.dispatchEvent(new Event("syntax-highlight"));
     });
 
@@ -97,24 +97,58 @@ test.describe("MicroLighter demo site (docs/index.html)", () => {
       const highlighted = new Set();
       for (const highlight of CSS.highlights.values()) {
         for (const range of highlight) {
-          const code = range.startContainer.parentElement?.closest("pre[lang] > code");
+          const code = range.startContainer.parentElement?.closest("pre > code");
           if (code) highlighted.add(code);
         }
       }
 
-      const blocks = [...document.querySelectorAll("pre[lang] > code")]
+      const blocks = [...document.querySelectorAll("pre > code[class*='language-']")]
         .filter(code => code.textContent.trim().length > 0);
 
       return {
-        langs: [...new Set(blocks.map(code => code.parentElement.getAttribute("lang")))],
+        langs: [...new Set(blocks.map(code => [...code.classList]
+          .find(className => className.startsWith("language-"))
+          .slice("language-".length)))],
         unhighlighted: blocks
           .filter(code => !highlighted.has(code))
-          .map(code => code.parentElement.getAttribute("lang"))
+          .map(code => code.className)
       };
     });
 
     expect(langs).toEqual(expect.arrayContaining(["python", "go", "rust", "typescript"]));
     expect(unhighlighted).toEqual([]);
+  });
+
+  test("supports standard classes, data attributes, and deprecated lang attributes", async ({ page }) => {
+    await page.goto("/", { waitUntil: "networkidle" });
+
+    const highlighted = await page.evaluate(async () => {
+      const fixtures = [
+        '<pre><code id="class-language" class="example language-js">const classValue = true;</code></pre>',
+        '<pre><code id="code-data-language" data-language="json">{"code": true}</code></pre>',
+        '<pre data-language="python"><code id="pre-data-language">value = True</code></pre>',
+        '<pre lang="ruby"><code id="legacy-lang">legacy = true</code></pre>'
+      ];
+      document.body.insertAdjacentHTML("beforeend", fixtures.join(""));
+      document.dispatchEvent(new Event("syntax-highlight"));
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      const ids = new Set();
+      for (const highlight of CSS.highlights.values()) {
+        for (const range of highlight) {
+          const id = range.startContainer.parentElement?.closest("code")?.id;
+          if (id) ids.add(id);
+        }
+      }
+      return [...ids];
+    });
+
+    expect(highlighted).toEqual(expect.arrayContaining([
+      "class-language",
+      "code-data-language",
+      "pre-data-language",
+      "legacy-lang"
+    ]));
   });
 
   test("loads without runtime errors", async ({ page }) => {

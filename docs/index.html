@@ -557,15 +557,15 @@
         <h2 id="install-label">Install</h2>
       </div>
       <div class="install-steps">
-        <p>Add MicroLighter to your project, import a theme, then highlight every <code>pre[lang] &gt; code</code> block on the page.</p>
+        <p>Add MicroLighter to your project, import a theme, then mark each code block with a <code>language-*</code> class.</p>
         <pre><code>npm install microlighter</code></pre>
-        <pre lang="javascript"><code>import { highlightAll } from "microlighter";
+        <pre><code class="language-javascript">import { highlightAll } from "microlighter";
 import "microlighter/themes/github.css";
 
 await highlightAll();</code></pre>
-        <pre lang="html"><code>&lt;pre lang="javascript"&gt;&lt;code&gt;const answer = 42;&lt;/code&gt;&lt;/pre&gt;</code></pre>
+        <pre><code class="language-html">&lt;pre&gt;&lt;code class="language-javascript"&gt;const answer = 42;&lt;/code&gt;&lt;/pre&gt;</code></pre>
         <p>Prefer automatic setup? Import the minified auto-runner instead. It highlights the page immediately and re-highlights when a <code>syntax-highlight</code> event is dispatched.</p>
-        <pre lang="javascript"><code>import "microlighter/microlighter.min.js";</code></pre>
+        <pre><code class="language-javascript">import "microlighter/microlighter.min.js";</code></pre>
         <a href="https://github.com/davatron5000/microlighter#readme">Read more in the docs</a>
       </div>
     </section>
@@ -579,7 +579,7 @@ await highlightAll();</code></pre>
       <div class="sample-label">
         <h2 id="markup-label">Markup</h2>
       </div>
-      <pre lang="html"><code>&lt;!-- Nested CSS and JS get highlighted inside HTML --&gt;
+      <pre><code class="language-html">&lt;!-- Nested CSS and JS get highlighted inside HTML --&gt;
 &lt;syntax-card data-syntax-theme="vscode-plus"&gt;
   &lt;template shadowrootmode="open"&gt;
     &lt;style&gt;
@@ -615,7 +615,7 @@ await highlightAll();</code></pre>
       <div class="sample-label">
         <h2 id="css-label">CSS</h2>
       </div>
-      <pre lang="css"><code>/* Load every bundled theme, then pick one on <html> */
+      <pre><code class="language-css">/* Load every bundled theme, then pick one on <html> */
 @import "microlighter/themes/index.css";
 
 /* Themes only paint the code blocks, not the whole page */
@@ -639,7 +639,7 @@ pre:has(code) {
       <div class="sample-label">
         <h2 id="go-label">Go</h2>
       </div>
-      <pre lang="go"><code>package highlight
+      <pre><code class="language-go">package highlight
 
 import "fmt"
 
@@ -667,7 +667,7 @@ func Tokenize(source string, scopes []string) ([]Token, error) {
       <div class="sample-label">
         <h2 id="javascript-label">JavaScript</h2>
       </div>
-      <pre lang="javascript"><code>/* Side-effect-free API: highlight when you're ready */
+      <pre><code class="language-javascript">/* Side-effect-free API: highlight when you're ready */
 import { highlightAll } from "microlighter";
 
 await highlightAll();
@@ -686,7 +686,7 @@ async function addSnippet(container, markup) {
       <div class="sample-label">
         <h2 id="json-label">JSON</h2>
       </div>
-      <pre lang="json"><code>{
+      <pre><code class="language-json">{
   "name": "microlighter",
   "version": "1.0.0",
   "type": "module",
@@ -702,7 +702,7 @@ async function addSnippet(container, markup) {
       <div class="sample-label">
         <h2 id="markdown-label">Markdown</h2>
       </div>
-      <pre lang="markdown"><code>---
+      <pre><code class="language-markdown">---
 title: MicroLighter
 layout: doc
 ---
@@ -726,7 +726,7 @@ and grammars are lazy-loaded on demand.
       <div class="sample-label">
         <h2 id="python-label">Python</h2>
       </div>
-      <pre lang="python"><code>from dataclasses import dataclass
+      <pre><code class="language-python">from dataclasses import dataclass
 
 
 @dataclass
@@ -754,24 +754,16 @@ if __name__ == "__main__":
       <div class="sample-label">
         <h2 id="ruby-label">Ruby</h2>
       </div>
-      <pre lang="ruby"><code># Jekyll hook: MicroLighter was extracted from a Jekyll site.
-# Rewrite fenced code blocks to carry a `lang` attribute so
-# MicroLighter can highlight them on the client.
-Jekyll::Hooks.register :documents, :post_render do |doc|
-  next unless doc.output_ext == ".html"
-
-  doc.output = doc.output.gsub(
-    /&lt;pre&gt;&lt;code class="language-(\w+)"&gt;/,
-    '&lt;pre lang="\1"&gt;&lt;code&gt;'
-  )
-end</code></pre>
+      <pre><code class="language-ruby"># CommonMark and Kramdown fenced code blocks already emit
+# &lt;code class="language-ruby"&gt;, so no Jekyll hook is needed.
+puts "MicroLighter reads the generated language class"</code></pre>
     </section>
 
     <section class="sample" aria-labelledby="rust-label">
       <div class="sample-label">
         <h2 id="rust-label">Rust</h2>
       </div>
-      <pre lang="rust"><code>use std::collections::HashMap;
+      <pre><code class="language-rust">use std::collections::HashMap;
 
 /// A scoped span of source text.
 #[derive(Debug, Clone)]
@@ -803,7 +795,7 @@ fn tokenize&lt;'a&gt;(source: &amp;'a str, scopes: &amp;[&amp;'a str]) -> Result
       <div class="sample-label">
         <h2 id="scss-label">SCSS</h2>
       </div>
-      <pre lang="scss"><code>// Author a MicroLighter theme from a token map
+      <pre><code class="language-scss">// Author a MicroLighter theme from a token map
 $tokens: (
   background: #011627,
   foreground: #d6deeb,
@@ -826,7 +818,7 @@ $tokens: (
       <div class="sample-label">
         <h2 id="shell-label">Shell</h2>
       </div>
-      <pre lang="bash"><code>#!/usr/bin/env bash
+      <pre><code class="language-bash">#!/usr/bin/env bash
 set -euo pipefail
 
 # Build the dist/ bundle and print a size report
@@ -843,7 +835,7 @@ npm run docs:update-homepage-stats</code></pre>
       <div class="sample-label">
         <h2 id="typescript-label">TypeScript</h2>
       </div>
-      <pre lang="typescript"><code>import { highlightAll } from "microlighter";
+      <pre><code class="language-typescript">import { highlightAll } from "microlighter";
 
 /** A scoped span of source text. */
 interface Token&lt;T = string&gt; {
@@ -883,7 +875,7 @@ await highlightAll();</code></pre>
       <div class="sample-label">
         <h2 id="git-diff-label">Git diff</h2>
       </div>
-      <pre lang="git-diff"><code>diff --git a/src/index.js b/src/index.js
+      <pre><code class="language-git-diff">diff --git a/src/index.js b/src/index.js
 index 5c96d8e..55c1324 100644
 --- a/src/index.js
 +++ b/src/index.js
@@ -900,7 +892,7 @@ index 5c96d8e..55c1324 100644
       <div class="sample-label">
         <h2 id="yaml-label">YAML</h2>
       </div>
-      <pre lang="yaml"><code># .github/workflows/ci.yml
+      <pre><code class="language-yaml"># .github/workflows/ci.yml
 name: CI
 
 on:
@@ -929,7 +921,7 @@ jobs:
       <h2 id="theme-code-title">Theme code</h2>
       <button id="close-theme-code" type="button">Close</button>
     </div>
-    <pre lang="css"><code id="theme-code"></code></pre>
+    <pre><code class="language-css" id="theme-code"></code></pre>
   </dialog>
 
   <script>

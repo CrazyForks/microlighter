@@ -12,18 +12,22 @@ highlight registry and CSS.
 ## Usage
 
 MicroLighter ships in three flavors so you can pick the right trade-off between
-convenience and control. In every case, mark up code blocks with a `lang`
-attribute on the `<pre>`:
+convenience and control. Use the HTML-standard `language-*` class on `<code>`:
 
 ```html
-<pre lang="javascript"><code>const answer = 42;</code></pre>
+<pre><code class="language-javascript">const answer = 42;</code></pre>
 ```
+
+MicroLighter also accepts `data-language="javascript"` on either `<code>` or
+its parent `<pre>`. The older `<pre lang="javascript">` form remains supported
+for compatibility but is deprecated because HTML's `lang` attribute describes
+human language.
 
 ### 1. Auto (drop-in)
 
 The auto-run entry (`microlighter/microlighter.js`, or the minified
 `microlighter/microlighter.min.js`) runs on import: it scans the page for
-`pre[lang] > code`, lazily imports only the grammars it needs, tokenizes each
+supported `<pre> > <code>` block, lazily imports only the grammars it needs, tokenizes each
 block, registers ranges with `CSS.highlights`, and re-highlights whenever a
 `syntax-highlight` event fires.
 
