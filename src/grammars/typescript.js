@@ -1,6 +1,7 @@
 // Reference: Microsoft VS Code (MIT) — https://github.com/microsoft/vscode/blob/main/extensions/typescript-basics/syntaxes/TypeScript.tmLanguage.json
 export default {
   scopeName: "source.ts",
+  dependencies: ["javascript"],
   patterns: [
     { include: "source.js#comments" },
     { include: "source.js#strings" },

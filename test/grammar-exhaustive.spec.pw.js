@@ -96,4 +96,26 @@ test.describe("Grammar exhaustive fixture (test/fixtures/grammar-exhaustive.html
     expect(diffHighlights.deleted).toEqual(expect.arrayContaining(["-const answer = 0;"]));
     expect(diffHighlights.keywords).toEqual([]);
   });
+
+  test("categorizes Svelte and Vue component syntax", async ({ page }) => {
+    await page.goto(FIXTURE, { waitUntil: "networkidle" });
+
+    const componentHighlights = await page.evaluate(() => {
+      const rangesFor = (language, category) => [...CSS.highlights.get(category) ?? []]
+        .filter(range => range.startContainer.parentElement?.closest(`code.language-${language}`))
+        .map(range => range.toString());
+
+      return {
+        svelteAttributes: rangesFor("svelte", "attribute-name"),
+        svelteKeywords: rangesFor("svelte", "keyword"),
+        vueAttributes: rangesFor("vue", "attribute-name"),
+        vueStorage: rangesFor("vue", "storage")
+      };
+    });
+
+    expect(componentHighlights.svelteAttributes).toContain("on:click");
+    expect(componentHighlights.svelteKeywords).toContain("if");
+    expect(componentHighlights.vueAttributes).toContain("@click");
+    expect(componentHighlights.vueStorage).toContain("const");
+  });
 });

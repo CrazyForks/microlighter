@@ -1,28 +1,5 @@
 import { highlight } from "./highlight.js";
-import { createGrammarLoader, normalizeLanguage } from "./grammar-dependencies.js";
-
-const languageClassFor = element => [...element.classList]
-  .find(className => className.startsWith("language-"))
-  ?.slice("language-".length);
-
-/**
- * Read and normalize the language declared by a code block.
- * @param {HTMLElement} code
- * @returns {string}
- */
-const languageFor = code => {
-  const pre = code.parentElement;
-  const language = languageClassFor(code)
-    || code.dataset.language
-    || languageClassFor(pre)
-    || pre.dataset.language
-    // Deprecated: `lang` describes human language, not programming language.
-    || pre.getAttribute("lang")
-    || "";
-
-  return normalizeLanguage(language.toLowerCase());
-};
-const loadGrammars = createGrammarLoader();
+import { languageFor, loadGrammars } from "./highlight-all.js";
 
 /**
  * Scan the DOM for code blocks, lazily load the grammars they need, and
@@ -31,14 +8,24 @@ const loadGrammars = createGrammarLoader();
  * @param {Object} [options]
  * @param {ParentNode} [options.root=document] Root to query within.
  * @param {string} [options.selector] Code block selector.
+ * @param {Object<string, string>} [options.languageAliases] Custom aliases
+ * mapping code block language names to shipped grammar names.
  * @returns {Promise<HTMLElement[]>} The highlighted code elements.
  */
-export const highlightAll = async ({ root = document, selector = "pre > code" } = {}) => {
-  const codeBlocks = [...root.querySelectorAll(selector)].filter(languageFor);
-  const languages = [...new Set(codeBlocks.map(languageFor))]
+export const highlightAll = async ({
+  root = document,
+  selector = "pre > code",
+  languageAliases
+} = {}) => {
+  const language = code => {
+    const requested = languageFor(code);
+    return languageAliases?.[requested] || requested;
+  };
+  const codeBlocks = [...root.querySelectorAll(selector)].filter(language);
+  const languages = [...new Set(codeBlocks.map(language))]
     .filter(language => /^[a-z0-9_-]+$/.test(language));
   const grammars = await loadGrammars(languages);
 
-  highlight(codeBlocks, code => grammars.byLanguage[languageFor(code)], grammars.byScope);
+  highlight(codeBlocks, code => grammars.byLanguage[language(code)], grammars.byScope);
   return codeBlocks;
 };

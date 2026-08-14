@@ -7,6 +7,7 @@
   "module": "./dist/index.js",
   "exports": {
     ".": "./dist/index.js",
+    "./language-aliases": "./dist/language-aliases.js",
     "./*": "./dist/*"
   },
   "files": [
@@ -17,7 +18,7 @@
     "./dist/microlighter.min.js"
   ],
   "sizeLimit": {
-    "dist/microlighter.min.js": 3000
+    "dist/microlighter.min.js": 2090
   },
   "scripts": {
     "build": "./build.sh",

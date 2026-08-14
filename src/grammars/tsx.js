@@ -4,6 +4,7 @@
 // TypeScript.tmLanguage.json and TypeScriptReact.tmLanguage.json relate upstream.
 export default {
   scopeName: "source.tsx",
+  dependencies: ["javascript", "typescript"],
   patterns: [
     { include: "source.js#comments" },
     { include: "source.js#strings" },

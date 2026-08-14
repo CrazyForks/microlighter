@@ -6,6 +6,7 @@ import {
   externalLanguagesFor,
   normalizeLanguage
 } from "../src/grammar-dependencies.js";
+import languageAliases from "../src/language-aliases.js";
 import cpp from "../src/grammars/cpp.js";
 import html from "../src/grammars/html.js";
 import markdown from "../src/grammars/markdown.js";
@@ -13,6 +14,8 @@ import objectiveC from "../src/grammars/objective-c.js";
 import scss from "../src/grammars/scss.js";
 import tsx from "../src/grammars/tsx.js";
 import typescript from "../src/grammars/typescript.js";
+import svelte from "../src/grammars/svelte.js";
+import vue from "../src/grammars/vue.js";
 
 test("finds external grammar languages in nested rules", () => {
   const grammar = {
@@ -31,7 +34,7 @@ test("finds external grammar languages in nested rules", () => {
     }
   };
 
-  assert.deepEqual([...externalLanguagesFor(grammar)], ["javascript", "yaml"]);
+  assert.deepEqual([...externalLanguagesFor(grammar)], ["js", "yaml"]);
 });
 
 test("recognizes source and text scopes but ignores unsupported includes", () => {
@@ -47,58 +50,43 @@ test("recognizes source and text scopes but ignores unsupported includes", () =>
 });
 
 test("normalizes language aliases and preserves canonical names", () => {
-  assert.equal(normalizeLanguage("js"), "javascript");
-  assert.equal(normalizeLanguage("yml"), "yaml");
-  assert.equal(normalizeLanguage("python"), "python");
-});
-
-test("normalizes aliases for the expanded grammar set", () => {
-  assert.equal(normalizeLanguage("c++"), "cpp");
-  assert.equal(normalizeLanguage("cc"), "cpp");
-  assert.equal(normalizeLanguage("cxx"), "cpp");
-  assert.equal(normalizeLanguage("h"), "c");
-  assert.equal(normalizeLanguage("hpp"), "cpp");
-  assert.equal(normalizeLanguage("cs"), "csharp");
-  assert.equal(normalizeLanguage("kt"), "kotlin");
-  assert.equal(normalizeLanguage("kts"), "kotlin");
-  assert.equal(normalizeLanguage("ps1"), "powershell");
-  assert.equal(normalizeLanguage("pwsh"), "powershell");
-  assert.equal(normalizeLanguage("gql"), "graphql");
-  assert.equal(normalizeLanguage("docker"), "dockerfile");
-  assert.equal(normalizeLanguage("xml"), "html");
-  assert.equal(normalizeLanguage("svg"), "html");
-  assert.equal(normalizeLanguage("webmanifest"), "json");
-  // tsx is now a genuine canonical grammar, not an alias to typescript.
-  assert.equal(normalizeLanguage("tsx"), "tsx");
-});
-
-test("normalizes aliases for the second expanded grammar set", () => {
-  assert.equal(normalizeLanguage("objc"), "objective-c");
-  assert.equal(normalizeLanguage("objectivec"), "objective-c");
-  assert.equal(normalizeLanguage("obj-c"), "objective-c");
-  assert.equal(normalizeLanguage("asm"), "assembly");
-  assert.equal(normalizeLanguage("nasm"), "assembly");
-  assert.equal(normalizeLanguage("x86asm"), "assembly");
-  assert.equal(normalizeLanguage("pl"), "perl");
-  assert.equal(normalizeLanguage("lua"), "lua");
-  assert.equal(normalizeLanguage("dart"), "dart");
-  assert.equal(normalizeLanguage("r"), "r");
+  assert.deepEqual(languageAliases, {
+    docker: "dockerfile",
+    gql: "graphql",
+    js: "javascript",
+    jsx: "javascript",
+    md: "markdown",
+    py: "python",
+    rb: "ruby",
+    sass: "scss",
+    sh: "bash",
+    shell: "bash",
+    ts: "typescript",
+    yml: "yaml",
+    zsh: "bash"
+  });
+  assert.equal(normalizeLanguage("jsx", languageAliases), "javascript");
+  assert.equal(normalizeLanguage("sass", languageAliases), "scss");
+  assert.equal(normalizeLanguage("python", languageAliases), "python");
 });
 
 test("reports dependencies used by the shipped grammars", () => {
   assert.deepEqual([...externalLanguagesFor(scss)], ["css"]);
   assert.deepEqual([...externalLanguagesFor(markdown)], ["yaml"]);
-  assert.deepEqual([...externalLanguagesFor(typescript)], ["javascript"]);
-  assert.deepEqual([...externalLanguagesFor(html)], ["css", "json", "javascript"]);
+  assert.deepEqual([...externalLanguagesFor(typescript)], ["js"]);
+  assert.deepEqual([...externalLanguagesFor(html)], ["css", "json", "js"]);
   assert.deepEqual([...externalLanguagesFor(cpp)], ["c"]);
-  assert.deepEqual([...externalLanguagesFor(tsx)], ["javascript", "typescript"]);
+  assert.deepEqual([...externalLanguagesFor(tsx)], ["js", "ts"]);
   assert.deepEqual([...externalLanguagesFor(objectiveC)], ["c"]);
+  assert.deepEqual(svelte.dependencies, ["html", "css", "scss", "javascript", "typescript"]);
+  assert.deepEqual(vue.dependencies, ["html", "css", "scss", "javascript", "typescript"]);
 });
 
 test("loads external dependencies once and indexes grammars by language and scope", async () => {
   const grammarFixtures = {
     html: {
       scopeName: "text.html",
+      dependencies: ["javascript"],
       patterns: [{ include: "source.js" }]
     },
     javascript: {
@@ -141,6 +129,14 @@ test("dynamically loads every new canonical grammar and transitively resolves it
   // tsx reuses TypeScript and JavaScript via external includes.
   assert.ok(loaded.byLanguage.javascript, "tsx should transitively load javascript");
   assert.ok(loaded.byLanguage.typescript, "tsx should transitively load typescript");
+});
+
+test("applies first-party aliases without caller configuration", async () => {
+  const load = createGrammarLoader();
+  const loaded = await load(["js"]);
+
+  assert.equal(loaded.byLanguage.js, loaded.byLanguage.javascript);
+  assert.equal(loaded.byScope.get("source.js"), loaded.byLanguage.javascript);
 });
 
 test("dynamically loads every second-batch canonical grammar and transitively resolves its dependencies", async () => {

@@ -600,7 +600,7 @@
       <article class="feature">
         <span class="feature-index" aria-hidden="true">02</span>
         <div class="feature-specimen size-specimen" aria-hidden="true">
-          <span class="size-value">2.18</span><span class="size-unit">kb<br>gzip</span>
+          <span class="size-value">2.03</span><span class="size-unit">kb<br>gzip</span>
         </div>
         <h2>Blazingly fast!!</h2>
       </article>
@@ -825,6 +825,8 @@ export function YetAnotherTodoApp(): JSX.Element {
             <li data-lang="javascript">JavaScript</li>
             <li data-lang="typescript">TypeScript</li>
             <li data-lang="tsx">TSX</li>
+            <li data-lang="svelte">Svelte</li>
+            <li data-lang="vue">Vue</li>
           </ul>
         </div>
         <div class="language-group">
@@ -1071,6 +1073,13 @@ SELECT id, scope FROM tokens
 WHERE start &gt;= 0
 LIMIT 10;</code></pre>
       </template>
+      <template data-lang="svelte" data-label="Svelte">
+        <pre><code class="language-svelte">&lt;script&gt;
+  let count = 0;
+&lt;/script&gt;
+
+&lt;button on:click={() =&gt; count++}&gt;Count: {count}&lt;/button&gt;</code></pre>
+      </template>
       <template data-lang="swift" data-label="Swift">
         <pre><code class="language-swift">struct Token {
     let scope: String
@@ -1096,6 +1105,13 @@ rollup = "4.46.2"</code></pre>
 }
 
 const answer: number = 42;</code></pre>
+      </template>
+      <template data-lang="vue" data-label="Vue">
+        <pre><code class="language-vue">&lt;script setup&gt;
+const count = ref(0)
+&lt;/script&gt;
+
+&lt;button @click="count++"&gt;Count: {{ count }}&lt;/button&gt;</code></pre>
       </template>
       <template data-lang="yaml" data-label="YAML">
         <pre><code class="language-yaml">name: CI
