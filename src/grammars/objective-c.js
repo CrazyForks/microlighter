@@ -1,6 +1,7 @@
 // Reference: Microsoft VS Code (MIT) — https://github.com/microsoft/vscode/blob/main/extensions/objective-c/syntaxes/objective-c.tmLanguage.json
 export default {
   scopeName: "source.objc",
+  dependencies: ["c"],
   patterns: [
     { include: "source.c#comments" },
     { include: "source.c#preprocessor" },

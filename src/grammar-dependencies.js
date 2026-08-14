@@ -1,50 +1,10 @@
-const aliases = {
-  asm: "assembly",
-  "c++": "cpp",
-  cc: "cpp",
-  cs: "csharp",
-  cxx: "cpp",
-  diff: "git-diff",
-  docker: "dockerfile",
-  golang: "go",
-  gql: "graphql",
-  h: "c",
-  hpp: "cpp",
-  htm: "html",
-  js: "javascript",
-  jsx: "javascript",
-  kt: "kotlin",
-  kts: "kotlin",
-  md: "markdown",
-  nasm: "assembly",
-  "obj-c": "objective-c",
-  objc: "objective-c",
-  objectivec: "objective-c",
-  patch: "git-diff",
-  pl: "perl",
-  ps1: "powershell",
-  pwsh: "powershell",
-  py: "python",
-  rb: "ruby",
-  rs: "rust",
-  sass: "scss",
-  sh: "bash",
-  shell: "bash",
-  svg: "html",
-  ts: "typescript",
-  webmanifest: "json",
-  x86asm: "assembly",
-  xml: "html",
-  yml: "yaml",
-  zsh: "bash"
-};
-
 /**
  * Convert a supported language alias to its grammar module name.
  * @param {string} language
+ * @param {Object<string, string>} aliases
  * @returns {string}
  */
-export const normalizeLanguage = language => aliases[language] || language;
+export const normalizeLanguage = (language, aliases) => aliases[language] || language;
 
 /**
  * Find grammar modules referenced by external TextMate scope includes.
@@ -62,7 +22,7 @@ export const externalLanguagesFor = value => {
       if (typeof item.include === "string" && !/^[#$]/.test(item.include)) {
         const scope = item.include.split("#")[0];
         const match = scope.match(/^(?:source|text)\.([a-z0-9_-]+)/);
-        if (match) languages.add(normalizeLanguage(match[1]));
+        if (match) languages.add(match[1]);
       }
       Object.values(item).forEach(visit);
     }
@@ -77,11 +37,9 @@ export const externalLanguagesFor = value => {
  * @param {string} language
  * @returns {Promise<Object | null>}
  */
-const importGrammar = language => {
-  return import(`./grammars/${language}.js`)
-    .then(module => module.default)
-    .catch(() => null);
-};
+const grammarFor = language => import(`./grammars/${language}.js`)
+  .then(module => module.default)
+  .catch(() => null);
 
 /**
  * Create a cached loader that also resolves external grammar dependencies.
@@ -91,13 +49,22 @@ const importGrammar = language => {
  *   byScope: Map<string, Object>
  * }>}
  */
-export const createGrammarLoader = (importLanguage = importGrammar) => {
+export const createGrammarLoader = (importLanguage = grammarFor) => {
   const grammarModules = new Map();
   const grammars = {
     byLanguage: {},
     byScope: new Map()
   };
+  let aliasesModule;
 
+  const normalizeLanguages = async languages => {
+    aliasesModule ||= import(`./${"language-aliases"}.js`);
+    const { default: aliases } = await aliasesModule;
+    return [...new Set(languages)].map(requested => ({
+      requested,
+      canonical: normalizeLanguage(requested, aliases)
+    })).filter(({ canonical }) => /^[a-z0-9_-]+$/.test(canonical));
+  };
   /**
    * Import and index a grammar once for the lifetime of this loader.
    * @param {string} language
@@ -119,15 +86,23 @@ export const createGrammarLoader = (importLanguage = importGrammar) => {
   };
 
   return async languages => {
-    let pendingLanguages = [...new Set(languages)]
+    const requestedLanguages = await normalizeLanguages(languages);
+    let pendingLanguages = requestedLanguages
+      .map(({ canonical }) => canonical)
       .filter(language => !grammarModules.has(language));
 
     while (pendingLanguages.length) {
       const loadedGrammars = (await Promise.all(pendingLanguages.map(loadGrammar))).filter(Boolean);
-      pendingLanguages = [...new Set(loadedGrammars
-        .flatMap(grammar => [...externalLanguagesFor(grammar)]))]
-        .filter(language => !grammarModules.has(language));
+      pendingLanguages = [...new Set(loadedGrammars.flatMap(grammar =>
+        grammar.dependencies || [...externalLanguagesFor(grammar)]
+      ))].filter(language => !grammarModules.has(language));
     }
+
+    requestedLanguages.forEach(({ requested, canonical }) => {
+      if (grammars.byLanguage[canonical]) {
+        grammars.byLanguage[requested] = grammars.byLanguage[canonical];
+      }
+    });
 
     return grammars;
   };

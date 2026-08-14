@@ -23,6 +23,30 @@ its parent `<pre>`. The older `<pre lang="javascript">` form remains supported
 for compatibility but is deprecated because HTML's `lang` attribute describes
 human language.
 
+Common aliases work automatically in both the import API and auto-run bundles.
+The same map is exported as a **get out of jail free card** when composing
+project-specific aliases:
+
+```js
+import languageAliases from "microlighter/language-aliases";
+
+console.log(languageAliases.jsx); // "javascript"
+```
+
+The map can be extended with project-specific names:
+
+```js
+await highlightAll({
+  languageAliases: {
+    ...languageAliases,
+    ecmascript: "javascript",
+    shellsession: "bash"
+  }
+});
+```
+
+Alias targets must be names of shipped grammars.
+
 ### 1. Auto (drop-in)
 
 The auto-run entry (`microlighter/microlighter.js`, or the minified
@@ -121,15 +145,14 @@ Grammars ship as ES modules in `src/grammars/` and are loaded on demand:
 `assembly`, `bash`, `c`, `cpp`, `csharp`, `css`, `dart`, `dockerfile`, `git-diff`,
 `go`, `graphql`, `html`, `java`, `javascript`, `json`, `kotlin`, `lua`, `markdown`,
 `objective-c`, `perl`, `php`, `powershell`, `python`, `r`, `ruby`, `rust`, `scss`,
-`sql`, `swift`, `toml`, `tsx`, `typescript`, `yaml`. `tsx` is a genuine grammar
-(TypeScript constructs plus JSX), not just an alias to `typescript`. `objective-c`
-reuses the shared `c` grammar's comments, preprocessor, and strings via external
-includes. `assembly` targets generic x86 Intel/NASM syntax. Common aliases (`js`,
-`jsx`, `ts`, `sh`, `shell`, `zsh`, `yml`, `rb`, `md`, `diff`, `patch`, `sass`, `py`,
-`rs`, `c++`, `cc`, `cxx`, `h`, `hpp`, `cs`, `kt`, `kts`, `ps1`, `pwsh`, `gql`,
-`docker`, `xml`, `svg`, `webmanifest`, `objc`, `objectivec`, `obj-c`, `asm`,
-`nasm`, `x86asm`, `pl`, …) resolve automatically — `xml` and `svg` reuse the
-HTML grammar and `webmanifest` reuses JSON.
+`sql`, `svelte`, `swift`, `toml`, `tsx`, `typescript`, `vue`, `yaml`. `tsx` is a
+genuine grammar (TypeScript constructs plus JSX), not just an alias to
+`typescript`. `objective-c` reuses the shared `c` grammar's comments,
+preprocessor, and strings via external includes. `assembly` targets generic x86
+Intel/NASM syntax. First-party common blog-oriented aliases include:
+`js` and `jsx` → `javascript`, `ts` → `typescript`, `sass` → `scss`, `sh` and
+`shell` and `zsh` → `bash`, `yml` → `yaml`, `md` → `markdown`, `docker` →
+`dockerfile`, `py` → `python`, `rb` → `ruby`, and `gql` → `graphql`.
 
 ## Build
 

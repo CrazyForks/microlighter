@@ -1,6 +1,7 @@
 // Reference: Microsoft VS Code (MIT) — https://github.com/microsoft/vscode/blob/main/extensions/scss/syntaxes/scss.tmLanguage.json
 export default {
   scopeName: "source.scss",
+  dependencies: ["css"],
   patterns: [
     { match: "//.*$", name: "comment.line.double-slash" },
     { match: "\\$[a-zA-Z_-][\\w-]*", name: "entity.name.variable" },

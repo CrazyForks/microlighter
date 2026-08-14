@@ -245,6 +245,44 @@ test.describe("MicroLighter demo site (docs/index.html)", () => {
     ]));
   });
 
+  test("accepts exported and custom language aliases through the import API", async ({ page }) => {
+    await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
+
+    const highlighted = await page.evaluate(async () => {
+      const root = document.createElement("div");
+      root.innerHTML = [
+        '<pre><code id="exported-alias" class="language-jsx">const exported = true;</code></pre>',
+        '<pre><code id="custom-alias" class="language-ecmascript">const custom = true;</code></pre>'
+      ].join("");
+      document.body.append(root);
+
+      const { highlightAll } = await import("/docs/microlighter/index.js");
+      const { default: languageAliases } =
+        await import("/docs/microlighter/language-aliases.js");
+      await highlightAll({
+        root,
+        languageAliases: {
+          ...languageAliases,
+          ecmascript: "javascript"
+        }
+      });
+
+      const ids = new Set();
+      for (const highlight of CSS.highlights.values()) {
+        for (const range of highlight) {
+          const id = range.startContainer.parentElement?.closest("code")?.id;
+          if (id) ids.add(id);
+        }
+      }
+      return [...ids];
+    });
+
+    expect(highlighted).toEqual(expect.arrayContaining([
+      "exported-alias",
+      "custom-alias"
+    ]));
+  });
+
   test("removes stale ranges when code blocks disappear", async ({ page }) => {
     await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
 

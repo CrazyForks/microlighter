@@ -1,6 +1,7 @@
 // Reference: Microsoft VS Code (MIT) — https://github.com/microsoft/vscode/blob/main/extensions/html/syntaxes/html.tmLanguage.json
 export default {
   scopeName: "text.html.basic",
+  dependencies: ["css", "json", "javascript"],
   patterns: [
     { include: "#comments" },
     { include: "#doctype" },

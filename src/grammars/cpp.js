@@ -1,6 +1,7 @@
 // Reference: Microsoft VS Code (MIT) — https://github.com/microsoft/vscode/blob/main/extensions/cpp/syntaxes/cpp.tmLanguage.json
 export default {
   scopeName: "source.cpp",
+  dependencies: ["c"],
   patterns: [
     { include: "source.c#comments" },
     { include: "source.c#preprocessor" },
