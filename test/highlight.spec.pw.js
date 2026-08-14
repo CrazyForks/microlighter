@@ -30,9 +30,116 @@ test.describe("MicroLighter demo site (docs/index.html)", () => {
 
     const { categories } = await readHighlights(page);
 
-    for (const category of ["keyword", "string", "comment", "function", "number"]) {
+    for (const category of ["keyword", "string", "comment", "function", "numeric"]) {
       expect(categories).toContain(category);
     }
+  });
+
+  test("maps TextMate scopes to stable semantic categories", async ({ page }) => {
+    await page.goto("/", { waitUntil: "networkidle" });
+
+    const actual = await page.evaluate(async () => {
+      const { highlight } = await import("/microlighter/highlight.js");
+      const mappings = [
+        ["comment.block.html", "comment"],
+        ["markup.quote", "quote"],
+        ["markup.inserted.diff", "inserted"],
+        ["markup.deleted.diff", "deleted"],
+        ["constant.character.entity", "character-entity"],
+        ["keyword.control.doctype", "doctype"],
+        ["keyword.control.at-rule", "at-rule"],
+        ["keyword.other.important", "important"],
+        ["entity.name.section", "section"],
+        ["string.regexp", "regexp"],
+        ["string.quoted.attribute-value", "attribute-value"],
+        ["string.other.link", "link"],
+        ["markup.raw", "raw"],
+        ["string.unquoted.fenced-code", "string"],
+        ["constant.numeric.line-number.diff", "numeric"],
+        ["constant.language.boolean", "boolean"],
+        ["constant.other.symbol", "symbol"],
+        ["constant.language", "constant"],
+        ["keyword.operator", "operator"],
+        ["storage.type", "storage"],
+        ["keyword.control.ts", "keyword"],
+        ["support.class.builtin", "support"],
+        ["entity.name.type.class", "type"],
+        ["entity.name.function.macro", "function"],
+        ["entity.name.decorator", "decorator"],
+        ["entity.name.animation", "animation"],
+        ["entity.name.variable.assignment", "variable"],
+        ["entity.name.interpolation", "interpolation"],
+        ["support.type.property-name", "property"],
+        ["entity.name.key", "key"],
+        ["entity.name.tag", "tag"],
+        ["entity.other.attribute-name", "attribute-name"],
+        ["entity.name.selector", "selector"],
+        ["punctuation.definition.string.begin", "punctuation"],
+        ["entity.name.anchor", "anchor"]
+      ];
+      const tokens = mappings.map((_, index) => `@${index}`);
+      const code = document.createElement("code");
+      code.textContent = tokens.join(" ");
+      document.body.append(code);
+
+      for (const category of CSS.highlights.keys()) CSS.highlights.delete(category);
+
+      const grammar = {
+        scopeName: "source.test",
+        patterns: mappings.map(([scope], index) => ({
+          match: `${tokens[index]}\\b`,
+          name: scope
+        }))
+      };
+      highlight([code], () => grammar, new Map());
+
+      return Object.fromEntries(
+        [...CSS.highlights].map(([category, ranges]) => [
+          category,
+          [...ranges].map(range => range.toString())
+        ])
+      );
+    });
+
+    const expected = {
+      comment: ["@0"],
+      quote: ["@1"],
+      inserted: ["@2"],
+      deleted: ["@3"],
+      "character-entity": ["@4"],
+      doctype: ["@5"],
+      "at-rule": ["@6"],
+      important: ["@7"],
+      section: ["@8"],
+      regexp: ["@9"],
+      "attribute-value": ["@10"],
+      link: ["@11"],
+      raw: ["@12"],
+      string: ["@13"],
+      numeric: ["@14"],
+      boolean: ["@15"],
+      symbol: ["@16"],
+      constant: ["@17"],
+      operator: ["@18"],
+      storage: ["@19"],
+      keyword: ["@20"],
+      support: ["@21"],
+      type: ["@22"],
+      function: ["@23"],
+      decorator: ["@24"],
+      animation: ["@25"],
+      variable: ["@26"],
+      interpolation: ["@27"],
+      property: ["@28"],
+      key: ["@29"],
+      tag: ["@30"],
+      "attribute-name": ["@31"],
+      selector: ["@32"],
+      punctuation: ["@33"],
+      anchor: ["@34"]
+    };
+
+    expect(actual).toEqual(expected);
   });
 
   test("highlights inserted and deleted git diff lines", async ({ page }) => {

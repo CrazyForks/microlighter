@@ -24,14 +24,17 @@
   color: var(--syntax-foreground);
 }
 
-::highlight(comment) {
+::highlight(comment),
+::highlight(quote) {
   color: var(--syntax-comment);
 }
 
 ::highlight(keyword),
-::highlight(atrule),
+::highlight(storage),
+::highlight(at-rule),
 ::highlight(doctype),
-::highlight(important) {
+::highlight(important),
+::highlight(section) {
   color: var(--syntax-keyword);
 }
 
@@ -41,35 +44,42 @@
 }
 
 ::highlight(string),
-::highlight(regex),
-::highlight(attr-value),
-::highlight(url) {
+::highlight(regexp),
+::highlight(attribute-value),
+::highlight(link),
+::highlight(raw) {
   color: var(--syntax-string);
 }
 
-::highlight(number),
+::highlight(numeric),
 ::highlight(boolean),
 ::highlight(constant),
 ::highlight(symbol),
+::highlight(character-entity),
+::highlight(anchor),
 ::highlight(entity) {
   color: var(--syntax-constant);
 }
 
-::highlight(function) {
+::highlight(function),
+::highlight(decorator),
+::highlight(animation) {
   color: var(--syntax-function);
 }
 
-::highlight(class-name),
-::highlight(builtin) {
+::highlight(type),
+::highlight(support) {
   color: var(--syntax-type);
 }
 
-::highlight(variable) {
+::highlight(variable),
+::highlight(interpolation) {
   color: var(--syntax-variable);
 }
 
 ::highlight(property),
-::highlight(attr-name) {
+::highlight(key),
+::highlight(attribute-name) {
   color: var(--syntax-property);
 }
 

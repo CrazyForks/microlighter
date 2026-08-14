@@ -532,7 +532,7 @@
       <article class="feature">
         <span class="feature-index" aria-hidden="true">02</span>
         <div class="feature-specimen size-specimen" aria-hidden="true">
-          <span class="size-value">2.12</span><span class="size-unit">kb<br>gzip</span>
+          <span class="size-value">1.98</span><span class="size-unit">kb<br>gzip</span>
         </div>
         <h2>Blazingly fast!!</h2>
       </article>
@@ -750,7 +750,7 @@ def tokenize(source: str, scopes: list[str]) -> list[Token]:
 
 
 if __name__ == "__main__":
-    for token in tokenize("const x = 42", ["keyword", "number"]):
+    for token in tokenize("const x = 42", ["keyword", "numeric"]):
         print(f"{token.scope}: {token.start}")</code></pre>
     </section>
 
@@ -804,7 +804,9 @@ $tokens: (
   background: #011627,
   foreground: #d6deeb,
   keyword: #c792ea,
-  string: #ecc48d
+  string: #ecc48d,
+  inserted: #addb67,
+  deleted: #ef5350
 );
 
 @mixin syntax-theme($name, $tokens) {
