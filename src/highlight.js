@@ -4,9 +4,15 @@
  * @param {(code: HTMLElement) => Object | undefined} grammarFor
  * @param {Map<string, Object>} grammarsByScope
  */
+const highlights = new Map();
+
 export const highlight = (blocks, grammarFor, grammarsByScope) => {
-  const highlights = new Map();
   const regexes = new Map();
+
+  highlights.forEach((ranges, category) => {
+    if (CSS.highlights.get(category) === ranges) CSS.highlights.delete(category);
+    ranges.clear();
+  });
 
   const categoryFor = scope => {
     if (/comment|markup\.quote/.test(scope)) return "comment";
@@ -190,6 +196,6 @@ export const highlight = (blocks, grammarFor, grammarsByScope) => {
   });
 
   highlights.forEach((ranges, category) => {
-    CSS.highlights.set(category, ranges);
+    if (ranges.size) CSS.highlights.set(category, ranges);
   });
 };
