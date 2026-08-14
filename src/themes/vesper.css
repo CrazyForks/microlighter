@@ -1,25 +1,25 @@
-/* Reference: Dracula Theme (MIT) — https://github.com/dracula/visual-studio-code/blob/main/src/dracula.yml */
-[data-syntax-theme="dracula"] {
-  --syntax-background: light-dark(#ffffff, #282a36);
-  --syntax-foreground: light-dark(#282a36, #f8f8f2);
-  --syntax-comment: light-dark(#6272a4, #6272a4);
-  --syntax-keyword: light-dark(#c21872, #ff79c6);
-  --syntax-operator: light-dark(#c21872, #ff79c6);
-  --syntax-string: light-dark(#8a7400, #f1fa8c);
-  --syntax-constant: light-dark(#714cac, #bd93f9);
-  --syntax-function: light-dark(#168a3f, #50fa7b);
-  --syntax-type: light-dark(#087e8b, #8be9fd);
-  --syntax-variable: light-dark(#282a36, #f8f8f2);
-  --syntax-property: light-dark(#087e8b, #8be9fd);
-  --syntax-tag: light-dark(#c21872, #ff79c6);
-  --syntax-selector: light-dark(#168a3f, #50fa7b);
-  --syntax-inserted: light-dark(#168a3f, #50fa7b);
-  --syntax-deleted: light-dark(#c21872, #ff79c6);
+/* Reference: Vesper by Rauno Freiberg (MIT) — https://github.com/raunofreiberg/vesper/blob/main/themes/Vesper-dark-color-theme.json */
+[data-syntax-theme="vesper"] {
+  --syntax-background: light-dark(#ffffff, #101010);
+  --syntax-foreground: light-dark(#101010, #ffffff);
+  --syntax-comment: light-dark(#707070, #8b8b8b);
+  --syntax-keyword: light-dark(#606060, #a0a0a0);
+  --syntax-operator: light-dark(#606060, #a0a0a0);
+  --syntax-string: light-dark(#007a61, #99ffe4);
+  --syntax-constant: light-dark(#9a5b24, #ffc799);
+  --syntax-function: light-dark(#9a5b24, #ffc799);
+  --syntax-type: light-dark(#9a5b24, #ffc799);
+  --syntax-variable: light-dark(#101010, #ffffff);
+  --syntax-property: light-dark(#101010, #ffffff);
+  --syntax-tag: light-dark(#9a5b24, #ffc799);
+  --syntax-selector: light-dark(#9a5b24, #ffc799);
+  --syntax-inserted: light-dark(#007a61, #99ffe4);
+  --syntax-deleted: light-dark(#b42318, #ff8080);
 
   color-scheme: light dark;
 }
 
-[data-syntax-theme="dracula"] pre:has(code) {
+[data-syntax-theme="vesper"] pre:has(code) {
   background-color: var(--syntax-background);
   color: var(--syntax-foreground);
 }

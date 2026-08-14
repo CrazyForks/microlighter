@@ -1,25 +1,25 @@
-/* Reference: Dracula Theme (MIT) — https://github.com/dracula/visual-studio-code/blob/main/src/dracula.yml */
-[data-syntax-theme="dracula"] {
-  --syntax-background: light-dark(#ffffff, #282a36);
-  --syntax-foreground: light-dark(#282a36, #f8f8f2);
-  --syntax-comment: light-dark(#6272a4, #6272a4);
-  --syntax-keyword: light-dark(#c21872, #ff79c6);
-  --syntax-operator: light-dark(#c21872, #ff79c6);
-  --syntax-string: light-dark(#8a7400, #f1fa8c);
-  --syntax-constant: light-dark(#714cac, #bd93f9);
-  --syntax-function: light-dark(#168a3f, #50fa7b);
-  --syntax-type: light-dark(#087e8b, #8be9fd);
-  --syntax-variable: light-dark(#282a36, #f8f8f2);
-  --syntax-property: light-dark(#087e8b, #8be9fd);
-  --syntax-tag: light-dark(#c21872, #ff79c6);
-  --syntax-selector: light-dark(#168a3f, #50fa7b);
-  --syntax-inserted: light-dark(#168a3f, #50fa7b);
-  --syntax-deleted: light-dark(#c21872, #ff79c6);
+/* Reference: Tokyo Night by Enkia (MIT) — https://github.com/enkia/tokyo-night-vscode-theme/tree/master/themes */
+[data-syntax-theme="tokyo-night"] {
+  --syntax-background: light-dark(#e6e7ed, #1a1b26);
+  --syntax-foreground: light-dark(#343b59, #a9b1d6);
+  --syntax-comment: light-dark(#888b94, #565f89);
+  --syntax-keyword: light-dark(#65359d, #bb9af7);
+  --syntax-operator: light-dark(#006c86, #7dcfff);
+  --syntax-string: light-dark(#385f0d, #9ece6a);
+  --syntax-constant: light-dark(#965027, #ff9e64);
+  --syntax-function: light-dark(#2959aa, #7aa2f7);
+  --syntax-type: light-dark(#65359d, #bb9af7);
+  --syntax-variable: light-dark(#343b58, #c0caf5);
+  --syntax-property: light-dark(#33635c, #73daca);
+  --syntax-tag: light-dark(#8c4351, #f7768e);
+  --syntax-selector: light-dark(#2959aa, #7aa2f7);
+  --syntax-inserted: light-dark(#33635c, #73daca);
+  --syntax-deleted: light-dark(#8c4351, #f7768e);
 
   color-scheme: light dark;
 }
 
-[data-syntax-theme="dracula"] pre:has(code) {
+[data-syntax-theme="tokyo-night"] pre:has(code) {
   background-color: var(--syntax-background);
   color: var(--syntax-foreground);
 }

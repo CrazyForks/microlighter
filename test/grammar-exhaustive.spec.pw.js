@@ -8,21 +8,23 @@ const canonicalGrammars = readdirSync(new URL("../src/grammars", import.meta.url
   .sort();
 
 /**
- * Map every live pre[lang] > code block to whether any CSS Custom Highlight
- * range currently points into it.
+ * Map every live pre > code[class*='language-'] block to whether any CSS
+ * Custom Highlight range currently points into it.
  */
 const readBlockCoverage = page =>
   page.evaluate(() => {
     const highlightedCodes = new Set();
     for (const highlight of CSS.highlights.values()) {
       for (const range of highlight) {
-        const code = range.startContainer.parentElement?.closest("pre[lang] > code");
+        const code = range.startContainer.parentElement?.closest("pre > code[class*='language-']");
         if (code) highlightedCodes.add(code);
       }
     }
 
-    return [...document.querySelectorAll("pre[lang] > code")].map(code => ({
-      lang: code.parentElement.getAttribute("lang"),
+    return [...document.querySelectorAll("pre > code[class*='language-']")].map(code => ({
+      lang: [...code.classList]
+        .find(className => className.startsWith("language-"))
+        .slice("language-".length),
       nonEmpty: code.textContent.trim().length > 0,
       highlighted: highlightedCodes.has(code)
     }));
@@ -46,7 +48,7 @@ test.describe("Grammar exhaustive fixture (test/fixtures/grammar-exhaustive.html
     expect(errors).toEqual([]);
   });
 
-  test("declares a non-empty pre[lang] block for every canonical grammar", async ({ page }) => {
+  test("declares a non-empty code[class*='language-'] block for every canonical grammar", async ({ page }) => {
     await page.goto(FIXTURE, { waitUntil: "networkidle" });
 
     const blocks = await readBlockCoverage(page);
@@ -70,7 +72,7 @@ test.describe("Grammar exhaustive fixture (test/fixtures/grammar-exhaustive.html
 
     const categories = await page.evaluate(() => [...CSS.highlights.keys()].sort());
 
-    for (const category of ["keyword", "string", "comment", "function", "number"]) {
+    for (const category of ["keyword", "string", "comment", "function", "numeric"]) {
       expect(categories).toContain(category);
     }
   });
@@ -80,7 +82,7 @@ test.describe("Grammar exhaustive fixture (test/fixtures/grammar-exhaustive.html
 
     const diffHighlights = await page.evaluate(() => {
       const linesFor = category => [...CSS.highlights.get(category) ?? []]
-        .filter(range => range.startContainer.parentElement?.closest("pre[lang='git-diff']"))
+        .filter(range => range.startContainer.parentElement?.closest("pre > code.language-git-diff"))
         .map(range => range.toString());
 
       return {

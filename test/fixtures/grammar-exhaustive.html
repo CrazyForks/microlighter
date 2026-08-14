@@ -21,123 +21,123 @@
 </head>
 <body>
   <main>
-    <pre lang="assembly"><code>section .data
+    <pre><code class="language-assembly">section .data
     msg db "tokens", 0
 section .text
     global _start
 _start:
     mov eax, 1
     int 0x80</code></pre>
-    <pre lang="bash"><code>#!/usr/bin/env bash
+    <pre><code class="language-bash">#!/usr/bin/env bash
 set -euo pipefail
 
 # Rebuild dist/ and run the test suite
 npm run build &amp;&amp; npm test</code></pre>
-    <pre lang="c"><code>#include &lt;stdio.h&gt;
+    <pre><code class="language-c">#include &lt;stdio.h&gt;
 
 int main(void) {
     printf("tokens: %d\n", 42);
     return 0;
 }</code></pre>
-    <pre lang="cpp"><code>#include &lt;string&gt;
+    <pre><code class="language-cpp">#include &lt;string&gt;
 
 struct Token {
     std::string scope;
     int start = 0;
 };</code></pre>
-    <pre lang="csharp"><code>public class Token {
+    <pre><code class="language-csharp">public class Token {
     public string Scope { get; set; } = "keyword";
     public int Start { get; set; } = 0;
 }</code></pre>
-    <pre lang="css"><code>/* Theme a single token */
+    <pre><code class="language-css">/* Theme a single token */
 ::highlight(keyword) {
   color: var(--syntax-keyword);
 }</code></pre>
-    <pre lang="dart"><code>class Token {
+    <pre><code class="language-dart">class Token {
   final String scope;
   final int start;
   const Token(this.scope, {this.start = 0});
 }</code></pre>
-    <pre lang="dockerfile"><code>FROM node:20-slim
+    <pre><code class="language-dockerfile">FROM node:20-slim
 WORKDIR /app
 COPY . .
 RUN npm ci &amp;&amp; npm run build</code></pre>
-    <pre lang="git-diff"><code>diff --git a/src/index.js b/src/index.js
+    <pre><code class="language-git-diff">diff --git a/src/index.js b/src/index.js
 --- a/src/index.js
 +++ b/src/index.js
 @@ -1,2 +1,2 @@
 -const answer = 0;
 +const answer = 42;</code></pre>
-    <pre lang="go"><code>package main
+    <pre><code class="language-go">package main
 
 import "fmt"
 
 func main() {
 	fmt.Println("tokens:", 42)
 }</code></pre>
-    <pre lang="graphql"><code># Fetch a token by id
+    <pre><code class="language-graphql"># Fetch a token by id
 query GetToken($id: ID!) {
   token(id: $id) {
     scope
   }
 }</code></pre>
-    <pre lang="html"><code>&lt;!-- A comment stays a comment --&gt;
+    <pre><code class="language-html">&lt;!-- A comment stays a comment --&gt;
 &lt;button type="button" aria-pressed="false"&gt;42&lt;/button&gt;</code></pre>
-    <pre lang="java"><code>public class Token {
+    <pre><code class="language-java">public class Token {
     String scope = "keyword";
     int start = 0;
 }</code></pre>
-    <pre lang="javascript"><code>// Highlight everything on the page
+    <pre><code class="language-javascript">// Highlight everything on the page
 import { highlightAll } from "microlighter";
 
 await highlightAll();</code></pre>
-    <pre lang="json"><code>{
+    <pre><code class="language-json">{
   "name": "microlighter",
   "version": "1.0.0"
 }</code></pre>
-    <pre lang="kotlin"><code>data class Token(val scope: String, val start: Int = 0)</code></pre>
-    <pre lang="lua"><code>-- Tokenize a tiny slice of source
+    <pre><code class="language-kotlin">data class Token(val scope: String, val start: Int = 0)</code></pre>
+    <pre><code class="language-lua">-- Tokenize a tiny slice of source
 local function tokenize(source)
     return source
 end</code></pre>
-    <pre lang="markdown"><code># MicroLighter
+    <pre><code class="language-markdown"># MicroLighter
 
 A **tiny** syntax highlighter for the [CSS Custom Highlight API](https://developer.mozilla.org/).</code></pre>
-    <pre lang="objective-c"><code>@interface Token : NSObject
+    <pre><code class="language-objective-c">@interface Token : NSObject
 @property (nonatomic, strong) NSString *scope;
 @end</code></pre>
-    <pre lang="perl"><code>#!/usr/bin/env perl
+    <pre><code class="language-perl">#!/usr/bin/env perl
 use strict;
 use warnings;
 
 my @tokens = split / /, "const x = 42";</code></pre>
-    <pre lang="php"><code>&lt;?php
+    <pre><code class="language-php">&lt;?php
 
 class Token {
     public function __construct(private string $scope) {}
 }</code></pre>
-    <pre lang="powershell"><code># Rebuild dist/ and run the tests
+    <pre><code class="language-powershell"># Rebuild dist/ and run the tests
 function Invoke-Build {
     npm run build
 }</code></pre>
-    <pre lang="python"><code>def tokenize(source: str) -&gt; list[str]:
+    <pre><code class="language-python">def tokenize(source: str) -&gt; list[str]:
     """Split source into words."""
     return source.split()</code></pre>
-    <pre lang="r"><code># Tokenize a tiny slice of source
+    <pre><code class="language-r"># Tokenize a tiny slice of source
 tokenize &lt;- function(source) {
   strsplit(source, " ")
 }</code></pre>
-    <pre lang="ruby"><code># Count tokens in a source string
+    <pre><code class="language-ruby"># Count tokens in a source string
 def tokenize(source)
   source.split(" ")
 end</code></pre>
-    <pre lang="rust"><code>/// A scoped span of source text.
+    <pre><code class="language-rust">/// A scoped span of source text.
 struct Token { scope: String, start: usize }
 
 fn main() {
     let answer = 42;
 }</code></pre>
-    <pre lang="scss"><code>// Author a theme from a token map
+    <pre><code class="language-scss">// Author a theme from a token map
 $keyword: #c792ea;
 
 @mixin syntax-theme($name) {
@@ -145,29 +145,29 @@ $keyword: #c792ea;
     --syntax-keyword: #{$keyword};
   }
 }</code></pre>
-    <pre lang="sql"><code>-- Find recent tokens
+    <pre><code class="language-sql">-- Find recent tokens
 SELECT id, scope FROM tokens
 WHERE start &gt;= 0
 LIMIT 10;</code></pre>
-    <pre lang="swift"><code>struct Token {
+    <pre><code class="language-swift">struct Token {
     let scope: String
     var start = 0
 }</code></pre>
-    <pre lang="toml"><code>name = "microlighter"
+    <pre><code class="language-toml">name = "microlighter"
 version = "1.0.0"
 
 [dependencies]
 rollup = "4.46.2"</code></pre>
-    <pre lang="tsx"><code>function Badge({ label }: { label: string }) {
+    <pre><code class="language-tsx">function Badge({ label }: { label: string }) {
   return &lt;span className="badge"&gt;{label}&lt;/span&gt;;
 }</code></pre>
-    <pre lang="typescript"><code>interface Token {
+    <pre><code class="language-typescript">interface Token {
   scope: string;
   start: number;
 }
 
 const answer: number = 42;</code></pre>
-    <pre lang="yaml"><code>name: CI
+    <pre><code class="language-yaml">name: CI
 on: [push]
 jobs:
   test:

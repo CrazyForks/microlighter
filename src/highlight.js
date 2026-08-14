@@ -21,38 +21,32 @@ export const highlight = (blocks, grammarFor, grammarsByScope) => {
   });
 
   /**
-   * Map a TextMate scope to the smaller set of CSS highlight categories.
+   * Flatten a TextMate scope to a stable semantic CSS highlight category.
    * @param {string} scope
    * @returns {string | undefined}
    */
   const categoryFor = scope => {
-    if (/comment|markup\.quote/.test(scope)) return "comment";
-    if (/markup\.inserted/.test(scope)) return "inserted";
-    if (/markup\.deleted/.test(scope)) return "deleted";
-    if (/constant\.character\.entity/.test(scope)) return "entity";
-    if (/keyword\.control\.doctype/.test(scope)) return "doctype";
-    if (/keyword\.control\.at-rule/.test(scope)) return "atrule";
-    if (/keyword\.other\.important|entity\.name\.section/.test(scope)) return "important";
-    if (/string\.regexp/.test(scope)) return "regex";
-    if (/string\..*attribute-value/.test(scope)) return "attr-value";
-    if (/string\.other\.link|entity\.name\.link/.test(scope)) return "url";
-    if (/string|markup\.raw/.test(scope)) return "string";
-    if (/constant\.numeric|\bnumeric\b/.test(scope)) return "number";
-    if (/constant\.language\.boolean/.test(scope)) return "boolean";
-    if (/constant\.other\.symbol/.test(scope)) return "symbol";
-    if (/constant/.test(scope)) return "constant";
-    if (/keyword\.operator/.test(scope)) return "operator";
-    if (/storage|keyword/.test(scope)) return "keyword";
-    if (/support\.class/.test(scope)) return "builtin";
-    if (/entity\.name\.type\.(?:class|constant)/.test(scope)) return "class-name";
-    if (/entity\.name\.(?:function|decorator|animation)/.test(scope)) return "function";
-    if (/variable|entity\.name\.(?:variable|interpolation)/.test(scope)) return "variable";
-    if (/support\.type\.property-name|entity\.name\.(?:property|key)/.test(scope)) return "property";
-    if (/entity\.name\.tag/.test(scope)) return "tag";
-    if (/entity\.other\.attribute-name/.test(scope)) return "attr-name";
-    if (/entity\.name\.selector/.test(scope)) return "selector";
-    if (/punctuation/.test(scope)) return "punctuation";
-    if (/entity|support/.test(scope)) return "symbol";
+    const parts = scope.split(".");
+    const [first, second, third] = parts;
+    const last = parts.at(-1);
+
+    if (first === "markup" && ["quote", "inserted", "deleted", "raw"].includes(second)) return second;
+    if (first === "entity" && second === "name") return third;
+    if (scope.startsWith("constant.character.entity")) return "character-entity";
+    if (parts.includes("numeric")) return "numeric";
+    if (scope.startsWith("support.type.property-name")) return "property";
+    if (parts.includes("attribute-value")) return "attribute-value";
+    if (scope.startsWith("string.other.link")) return "link";
+
+    if ([
+      "doctype", "at-rule", "important", "regexp", "boolean",
+      "symbol", "operator", "attribute-name"
+    ].includes(last)) return last;
+
+    if ([
+      "comment", "string", "constant", "storage", "keyword",
+      "variable", "punctuation", "entity", "support"
+    ].includes(first)) return first;
   };
 
   /**
