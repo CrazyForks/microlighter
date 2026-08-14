@@ -79,6 +79,25 @@ and set its name in `data-syntax-theme` on `<body>` or any containing element:
 <link rel="stylesheet" href="./src/themes/night-owl.css">
 ```
 
+Highlight names flatten canonical TextMate scope terms into stable CSS
+identifiers. Related categories share a smaller color palette:
+
+| Theme variable | Highlight categories |
+| --- | --- |
+| `--syntax-comment` | `comment`, `quote` |
+| `--syntax-keyword` | `keyword`, `storage`, `at-rule`, `doctype`, `important`, `section` |
+| `--syntax-operator` | `operator`, `punctuation` |
+| `--syntax-string` | `string`, `regexp`, `attribute-value`, `link`, `raw` |
+| `--syntax-constant` | `numeric`, `boolean`, `constant`, `symbol`, `character-entity`, `entity`, `anchor` |
+| `--syntax-function` | `function`, `decorator`, `animation` |
+| `--syntax-type` | `type`, `support` |
+| `--syntax-variable` | `variable`, `interpolation` |
+| `--syntax-property` | `property`, `key`, `attribute-name` |
+| `--syntax-tag` | `tag` |
+| `--syntax-selector` | `selector` |
+| `--syntax-inserted` | `inserted` |
+| `--syntax-deleted` | `deleted` |
+
 Bundled themes:
 
 - `github`
@@ -171,7 +190,7 @@ token ranges to `Highlight` objects instead of wrapping every token in a
 is a tiny, dependency-free implementation: it parses [TextMate grammars][tm]
 with the browser's native `RegExp` (using the [`d` flag][d-flag] for match
 indices) rather than shipping the Oniguruma WASM engine, lazily loads grammars,
-and maps scopes onto Prism-style category names.
+and flattens scopes into semantic category names derived from TextMate.
 
 Foundations and inspiration:
 
@@ -179,10 +198,9 @@ Foundations and inspiration:
   `patterns`, `repository`, `include`) that MicroLighter interprets. Popularized
   by [TextMate][textmate] and adopted by [VS Code][vscode-grammar], which is
   where most of the community `.tmLanguage.json` grammars come from.
-- **[Prism.js][prism]** — the token category vocabulary (`keyword`, `string`,
-  `punctuation`, `function`, `tag`, etc.) that themes target via
-  `::highlight(...)` mirrors Prism's token class names, so existing Prism themes
-  are easy to port.
+- **[Prism.js][prism]** — inspiration for styling semantic token categories
+  directly with CSS. MicroLighter uses `::highlight(...)` rather than generated
+  token spans and names its categories from TextMate scopes.
 - **[Shiki][shiki]** — the canonical TextMate-grammar-based highlighter for the
   web (backed by VS Code's Oniguruma tokenizer). MicroLighter trades Shiki's
   accuracy and language coverage for zero dependencies and a smaller footprint.

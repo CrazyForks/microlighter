@@ -45,11 +45,13 @@ the GitHub Pages deployment artifact.
 
 ## How highlighting works
 
-MicroLighter tokenizes code with TextMate grammars, then maps each grammar
-**scope** (e.g. `keyword.control.js`) to a small set of **categories**
-(`keyword`, `string`, `comment`, …) in `src/highlight.js`. Themes then style
-those categories via the `::highlight(category)` pseudo-element. There are no
-per-token `<span>`s — ranges live in the CSS Custom Highlight registry.
+MicroLighter tokenizes code with TextMate grammars, then flattens each grammar
+**scope** (e.g. `keyword.control.js`) to a stable semantic **category**
+(`keyword`, `string`, `comment`, …) in `src/highlight.js`. Category names follow
+canonical TextMate scope terms; related categories share the smaller theme
+palette documented in the README. Themes style categories via the
+`::highlight(category)` pseudo-element. There are no per-token `<span>`s —
+ranges live in the CSS Custom Highlight registry.
 
 ### Adding a grammar
 
