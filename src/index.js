@@ -1,15 +1,27 @@
 import { highlight } from "./highlight.js";
 import { createGrammarLoader, normalizeLanguage } from "./grammar-dependencies.js";
 
+const languageClassFor = element => [...element.classList]
+  .find(className => className.startsWith("language-"))
+  ?.slice("language-".length);
+
 /**
- * Read and normalize the language declared by a code block's parent element.
+ * Read and normalize the language declared by a code block.
  * @param {HTMLElement} code
  * @returns {string}
  */
 const languageFor = code => {
-  return normalizeLanguage(code.parentElement.lang.toLowerCase());
-};
+  const pre = code.parentElement;
+  const language = languageClassFor(code)
+    || code.dataset.language
+    || languageClassFor(pre)
+    || pre.dataset.language
+    // Deprecated: `lang` describes human language, not programming language.
+    || pre.getAttribute("lang")
+    || "";
 
+  return normalizeLanguage(language.toLowerCase());
+};
 const loadGrammars = createGrammarLoader();
 
 /**
@@ -18,11 +30,11 @@ const loadGrammars = createGrammarLoader();
  *
  * @param {Object} [options]
  * @param {ParentNode} [options.root=document] Root to query within.
- * @param {string} [options.selector="pre[lang] > code"] Code block selector.
+ * @param {string} [options.selector] Code block selector.
  * @returns {Promise<HTMLElement[]>} The highlighted code elements.
  */
-export const highlightAll = async ({ root = document, selector = "pre[lang] > code" } = {}) => {
-  const codeBlocks = [...root.querySelectorAll(selector)];
+export const highlightAll = async ({ root = document, selector = "pre > code" } = {}) => {
+  const codeBlocks = [...root.querySelectorAll(selector)].filter(languageFor);
   const languages = [...new Set(codeBlocks.map(languageFor))]
     .filter(language => /^[a-z0-9_-]+$/.test(language));
   const grammars = await loadGrammars(languages);
