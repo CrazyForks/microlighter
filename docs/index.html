@@ -389,6 +389,70 @@
       color: var(--page-muted);
     }
 
+    .language-index {
+      display: grid;
+      gap: 1.25rem;
+      padding-block: 2rem;
+      border-bottom: 1px solid var(--page-border);
+    }
+
+    .language-index > p {
+      max-width: 62ch;
+      color: var(--page-muted);
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    .language-groups {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+      gap: 1.5rem;
+    }
+
+    .language-group h3 {
+      margin: 0 0 0.6rem;
+      color: var(--page-muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .language-group ul {
+      display: grid;
+      gap: 0.35rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      font-size: 0.85rem;
+    }
+
+    .language-group li::before {
+      margin-inline-end: 0.5rem;
+      color: var(--syntax-keyword);
+      content: "\2022";
+    }
+
+    .playground-body {
+      display: grid;
+      align-content: start;
+      gap: 1rem;
+    }
+
+    .playground-control {
+      display: grid;
+      gap: 0.4rem;
+      width: min(100%, 18rem);
+      color: var(--page-muted);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .playground-output pre {
+      margin: 0;
+    }
+
     pre {
       min-width: 0;
       min-height: 18rem;
@@ -462,6 +526,10 @@
 
       .feature {
         grid-template-rows: auto 5.5rem auto;
+      }
+
+      .language-groups {
+        grid-template-columns: 1fr;
       }
     }
 
@@ -579,347 +647,462 @@ await highlightAll();</code></pre>
       <div class="sample-label">
         <h2 id="markup-label">Markup</h2>
       </div>
-      <pre lang="html"><code>&lt;!-- Nested CSS and JS get highlighted inside HTML --&gt;
-&lt;syntax-card data-syntax-theme="vscode-plus"&gt;
-  &lt;template shadowrootmode="open"&gt;
-    &lt;style&gt;
-      :host {
-        display: grid;
-        gap: 0.5rem;
-        color: #f8f8f2;
-        background: oklch(28% 0.04 275);
-      }
-    &lt;/style&gt;
+      <pre lang="html"><code>&lt;!-- This div centers the div that centers the button. --&gt;
+&lt;div class="centerer"&gt;
+  &lt;div class="centered"&gt;
+    &lt;button id="victory" type="button"&gt;Center me&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
 
-    &lt;button type="button" aria-pressed="false"&gt;
-      Change theme
-    &lt;/button&gt;
-  &lt;/template&gt;
-&lt;/syntax-card&gt;
-&lt;script type="module"&gt;
-  import { highlightAll } from "microlighter";
-
-  class SyntaxCard extends HTMLElement {
-    async connectedCallback() {
-      const button = this.querySelector("button");
-      button.addEventListener("click", () =&gt; this.toggleAttribute("open"));
-      await highlightAll({ root: this });
-    }
+&lt;style&gt;
+  .centerer {
+    display: grid;
+    min-height: 100vh;
+    place-items: center;
   }
 
-  customElements.define("syntax-card", SyntaxCard);
+  .centered {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+&lt;/style&gt;
+
+&lt;script&gt;
+  document.querySelector("#victory").addEventListener("click", event =&gt; {
+    event.target.textContent = "Still centered.";
+  });
 &lt;/script&gt;</code></pre>
-    </section>
-
-    <section class="sample" aria-labelledby="css-label">
-      <div class="sample-label">
-        <h2 id="css-label">CSS</h2>
-      </div>
-      <pre lang="css"><code>/* Load every bundled theme, then pick one on <html> */
-@import "microlighter/themes/index.css";
-
-/* Themes only paint the code blocks, not the whole page */
-pre:has(code) {
-  padding: clamp(1rem, 3vw, 2rem);
-  border-radius: 8px;
-  background-color: var(--syntax-background);
-  color: var(--syntax-foreground);
-}
-
-::highlight(keyword) {
-  color: var(--syntax-keyword);
-}
-
-::highlight(string) {
-  color: var(--syntax-string);
-}</code></pre>
-    </section>
-
-    <section class="sample" aria-labelledby="go-label">
-      <div class="sample-label">
-        <h2 id="go-label">Go</h2>
-      </div>
-      <pre lang="go"><code>package highlight
-
-import "fmt"
-
-// Token is a scoped span of source text.
-type Token struct {
-	Scope      string
-	Start, End int
-}
-
-// Tokenize splits source into scoped tokens.
-func Tokenize(source string, scopes []string) ([]Token, error) {
-	if len(scopes) == 0 {
-		return nil, fmt.Errorf("no scopes for %q", source)
-	}
-
-	tokens := make([]Token, 0, len(scopes))
-	for i, scope := range scopes {
-		tokens = append(tokens, Token{Scope: scope, Start: i})
-	}
-	return tokens, nil
-}</code></pre>
-    </section>
-
-    <section class="sample" aria-labelledby="javascript-label">
-      <div class="sample-label">
-        <h2 id="javascript-label">JavaScript</h2>
-      </div>
-      <pre lang="javascript"><code>/* Side-effect-free API: highlight when you're ready */
-import { highlightAll } from "microlighter";
-
-await highlightAll();
-
-// Scope to part of the page, or use a custom selector
-await highlightAll({ root: document.querySelector("#docs") });
-
-// Re-highlight after injecting code in a SPA
-async function addSnippet(container, markup) {
-  container.insertAdjacentHTML("beforeend", markup);
-  await highlightAll({ root: container });
-}</code></pre>
-    </section>
-
-    <section class="sample" aria-labelledby="json-label">
-      <div class="sample-label">
-        <h2 id="json-label">JSON</h2>
-      </div>
-      <pre lang="json"><code>{
-  "name": "microlighter",
-  "version": "1.0.0",
-  "type": "module",
-  "exports": {
-    ".": "./dist/index.js",
-    "./*": "./dist/*"
-  },
-  "sideEffects": ["./dist/microlighter.js", "./dist/microlighter.min.js"]
-}</code></pre>
     </section>
 
     <section class="sample" aria-labelledby="markdown-label">
       <div class="sample-label">
         <h2 id="markdown-label">Markdown</h2>
       </div>
-      <pre lang="markdown"><code>---
-title: MicroLighter
-layout: doc
----
+      <pre lang="markdown"><code># Yet Another Todo App
 
-# MicroLighter
+![build: passing](https://img.shields.io/badge/build-passing-brightgreen)
+![coverage: probably](https://img.shields.io/badge/coverage-probably-yellow)
+![works: here](https://img.shields.io/badge/works-on_my_machine-blue)
 
-A tiny, **dependency-free** syntax highlighter built on the
-[CSS Custom Highlight API](https://developer.mozilla.org/).
+A **blazingly fast** todo app for developers who found the other
+47,000 todo apps insufficiently opinionated.
 
 ## Install
 
-    npm install microlighter
+    npm install yet-another-todo
 
-Highlights *without* `&lt;span&gt;` soup — ranges live in `CSS.highlights`,
-and grammars are lazy-loaded on demand.
+## Usage
 
-&gt; Your markup stays clean; the color lives in CSS.</code></pre>
+Run `npm start`, add "write documentation" to the list, then ignore it.
+
+## Documentation
+
+Coming soon™
+
+&gt; Production-ready, once we decide what production means.</code></pre>
     </section>
 
     <section class="sample" aria-labelledby="python-label">
       <div class="sample-label">
         <h2 id="python-label">Python</h2>
       </div>
-      <pre lang="python"><code>from dataclasses import dataclass
+      <pre lang="python"><code>def readable_version(groups: list[list[str]]) -&gt; list[str]:
+    words = []
+    for group in groups:
+        for sentence in group:
+            for word in sentence.split():
+                if len(word) &gt; 3:
+                    words.append(word.lower())
+    return words
 
 
-@dataclass
-class Token:
-    """A highlighted range with a scope."""
-
-    scope: str
-    start: int
-    end: int = 0
-
-
-def tokenize(source: str, scopes: list[str]) -> list[Token]:
-    tokens = [Token(scope, i) for i, scope in enumerate(scopes)]
-    if not tokens:
-        raise ValueError("no scopes")
-    return sorted(tokens, key=lambda t: t.start)
+def pythonic_version(groups: list[list[str]]) -&gt; list[str]:
+    return [
+        word.lower()
+        for group in groups
+        for sentence in group
+        for word in sentence.split()
+        if len(word) &gt; 3
+    ]  # Pythonic.
 
 
-if __name__ == "__main__":
-    for token in tokenize("const x = 42", ["keyword", "number"]):
-        print(f"{token.scope}: {token.start}")</code></pre>
+assert readable_version([["Simple is better than nested"]]) == \
+    pythonic_version([["Simple is better than nested"]])</code></pre>
     </section>
 
-    <section class="sample" aria-labelledby="ruby-label">
+    <section class="sample" aria-labelledby="sql-label">
       <div class="sample-label">
-        <h2 id="ruby-label">Ruby</h2>
+        <h2 id="sql-label">SQL</h2>
       </div>
-      <pre lang="ruby"><code># Jekyll hook: MicroLighter was extracted from a Jekyll site.
-# Rewrite fenced code blocks to carry a `lang` attribute so
-# MicroLighter can highlight them on the client.
-Jekyll::Hooks.register :documents, :post_render do |doc|
-  next unless doc.output_ext == ".html"
-
-  doc.output = doc.output.gsub(
-    /&lt;pre&gt;&lt;code class="language-(\w+)"&gt;/,
-    '&lt;pre lang="\1"&gt;&lt;code&gt;'
-  )
-end</code></pre>
+      <pre lang="sql"><code>-- Find meetings that could have been emails
+SELECT
+  m.title,
+  COUNT(a.user_id) AS witnesses,
+  SUM(m.duration_minutes) / 60.0 AS hours_wasted
+FROM meetings AS m
+JOIN attendees AS a ON a.meeting_id = m.id
+WHERE m.could_have_been_email = TRUE
+  AND m.outcome = 'another_meeting'
+GROUP BY m.id, m.title
+HAVING COUNT(a.user_id) &gt; 2
+ORDER BY hours_wasted DESC
+LIMIT 10;</code></pre>
     </section>
 
-    <section class="sample" aria-labelledby="rust-label">
+    <section class="sample" aria-labelledby="cpp-label">
       <div class="sample-label">
-        <h2 id="rust-label">Rust</h2>
+        <h2 id="cpp-label">C++</h2>
       </div>
-      <pre lang="rust"><code>use std::collections::HashMap;
+      <pre lang="cpp"><code>#include &lt;iostream&gt;
+#include &lt;memory&gt;
+#include &lt;string&gt;
 
-/// A scoped span of source text.
-#[derive(Debug, Clone)]
-struct Token&lt;'a&gt; {
-    scope: &amp;'a str,
-    start: usize,
-    end: usize,
-}
+class Meeting {
+public:
+    explicit Meeting(std::string agenda)
+        : agenda_(std::move(agenda)) {}
 
-fn tokenize&lt;'a&gt;(source: &amp;'a str, scopes: &amp;[&amp;'a str]) -> Result&lt;Vec&lt;Token&lt;'a&gt;&gt;, String&gt; {
-    if scopes.is_empty() {
-        return Err(format!("no scopes for {source:?}"));
+    ~Meeting() {
+        std::cout &lt;&lt; "This meeting has finally ended.\n";
     }
 
-    let mut counts: HashMap&lt;&amp;str, u32&gt; = HashMap::new();
-    let tokens = scopes
-        .iter()
-        .enumerate()
-        .map(|(i, &amp;scope)| {
-            *counts.entry(scope).or_insert(0) += 1;
-            Token { scope, start: i, end: i + 1 }
-        })
-        .collect();
-    Ok(tokens)
+private:
+    std::string agenda_;
+};
+
+std::unique_ptr&lt;Meeting&gt; make_meeting(std::string agenda) {
+    return std::make_unique&lt;Meeting&gt;(std::move(agenda));
+}
+
+int main() {
+    auto meeting = make_meeting("Discuss the next meeting");
+    auto sequel = std::move(meeting); // Ownership is now perfectly clear.
+    return 0;
+}
+</code></pre>
+    </section>
+
+    <section class="sample" aria-labelledby="tsx-label">
+      <div class="sample-label">
+        <h2 id="tsx-label">TSX</h2>
+      </div>
+      <pre lang="tsx"><code>import { useCallback, useEffect, useMemo, useState } from "react";
+
+export function YetAnotherTodoApp(): JSX.Element {
+  const [done, setDone] = useState(false);
+  const completedCount = useMemo(() =&gt; Number(done), [done]);
+  const toggle = useCallback(() =&gt; setDone(value =&gt; !value), []);
+
+  useEffect(() =&gt; {
+    console.log(`${completedCount} productivity units achieved`);
+  }, [completedCount]);
+
+  return (
+    &lt;label&gt;
+      &lt;input type="checkbox" checked={done} onChange={toggle} /&gt;
+      Write a simpler todo app
+      {/* TODO: replace this with a state management library. */}
+    &lt;/label&gt;
+  );
 }</code></pre>
     </section>
 
-    <section class="sample" aria-labelledby="scss-label">
-      <div class="sample-label">
-        <h2 id="scss-label">SCSS</h2>
+    <section class="language-index" aria-labelledby="language-index-heading">
+      <h2 id="language-index-heading">Supported languages</h2>
+      <p>Every grammar below ships as its own module and loads only when a page actually uses it. That includes formats like Git diff and config languages like TOML that aren't strictly "programming languages" but still get real TextMate scoping.</p>
+      <div class="language-groups">
+        <div class="language-group">
+          <h3>Web</h3>
+          <ul>
+            <li data-lang="html">HTML</li>
+            <li data-lang="css">CSS</li>
+            <li data-lang="scss">SCSS</li>
+            <li data-lang="javascript">JavaScript</li>
+            <li data-lang="typescript">TypeScript</li>
+            <li data-lang="tsx">TSX</li>
+          </ul>
+        </div>
+        <div class="language-group">
+          <h3>Systems</h3>
+          <ul>
+            <li data-lang="c">C</li>
+            <li data-lang="cpp">C++</li>
+            <li data-lang="rust">Rust</li>
+            <li data-lang="go">Go</li>
+            <li data-lang="assembly">Assembly</li>
+          </ul>
+        </div>
+        <div class="language-group">
+          <h3>Application</h3>
+          <ul>
+            <li data-lang="java">Java</li>
+            <li data-lang="csharp">C#</li>
+            <li data-lang="kotlin">Kotlin</li>
+            <li data-lang="swift">Swift</li>
+            <li data-lang="objective-c">Objective-C</li>
+            <li data-lang="dart">Dart</li>
+            <li data-lang="php">PHP</li>
+          </ul>
+        </div>
+        <div class="language-group">
+          <h3>Scripting</h3>
+          <ul>
+            <li data-lang="python">Python</li>
+            <li data-lang="ruby">Ruby</li>
+            <li data-lang="bash">Bash</li>
+            <li data-lang="perl">Perl</li>
+            <li data-lang="powershell">PowerShell</li>
+            <li data-lang="lua">Lua</li>
+            <li data-lang="r">R</li>
+          </ul>
+        </div>
+        <div class="language-group">
+          <h3>Data, config &amp; docs</h3>
+          <ul>
+            <li data-lang="json">JSON</li>
+            <li data-lang="yaml">YAML</li>
+            <li data-lang="toml">TOML</li>
+            <li data-lang="sql">SQL</li>
+            <li data-lang="markdown">Markdown</li>
+            <li data-lang="graphql">GraphQL</li>
+            <li data-lang="dockerfile">Dockerfile</li>
+            <li data-lang="git-diff">Git diff</li>
+          </ul>
+        </div>
       </div>
-      <pre lang="scss"><code>// Author a MicroLighter theme from a token map
-$tokens: (
-  background: #011627,
-  foreground: #d6deeb,
-  keyword: #c792ea,
-  string: #ecc48d
-);
-
-@mixin syntax-theme($name, $tokens) {
-  [data-syntax-theme="#{$name}"] {
-    @each $token, $value in $tokens {
-      --syntax-#{$token}: #{$value};
-    }
-  }
-}
-
-@include syntax-theme("night-owl", $tokens);</code></pre>
     </section>
 
-    <section class="sample" aria-labelledby="shell-label">
+    <section class="sample playground" aria-labelledby="playground-label">
       <div class="sample-label">
-        <h2 id="shell-label">Shell</h2>
+        <h2 id="playground-label">Playground</h2>
       </div>
-      <pre lang="bash"><code>#!/usr/bin/env bash
+      <div class="playground-body">
+        <label class="playground-control" for="playground-language">
+          Preview a language
+          <select id="playground-language"></select>
+        </label>
+        <div class="playground-output" id="playground-output" aria-live="polite"></div>
+      <template data-lang="assembly" data-label="Assembly (x86 NASM)">
+        <pre lang="assembly"><code>section .data
+    msg db "tokens", 0
+section .text
+    global _start
+_start:
+    mov eax, 1
+    int 0x80</code></pre>
+      </template>
+      <template data-lang="bash" data-label="Bash">
+        <pre lang="bash"><code>#!/usr/bin/env bash
 set -euo pipefail
 
-# Build the dist/ bundle and print a size report
-npm run build
+# Rebuild dist/ and run the test suite
+npm run build &amp;&amp; npm test</code></pre>
+      </template>
+      <template data-lang="c" data-label="C">
+        <pre lang="c"><code>#include &lt;stdio.h&gt;
 
-# Rebuild, then run the Playwright end-to-end tests
-npm test
+int main(void) {
+    printf("tokens: %d\n", 42);
+    return 0;
+}</code></pre>
+      </template>
+      <template data-lang="csharp" data-label="C#">
+        <pre lang="csharp"><code>public class Token {
+    public string Scope { get; set; } = "keyword";
+    public int Start { get; set; } = 0;
+}</code></pre>
+      </template>
+      <template data-lang="cpp" data-label="C++">
+        <pre lang="cpp"><code>#include &lt;string&gt;
 
-# Refresh the gzip figure on the docs homepage
-npm run docs:update-homepage-stats</code></pre>
-    </section>
-
-    <section class="sample" aria-labelledby="typescript-label">
-      <div class="sample-label">
-        <h2 id="typescript-label">TypeScript</h2>
-      </div>
-      <pre lang="typescript"><code>import { highlightAll } from "microlighter";
-
-/** A scoped span of source text. */
-interface Token&lt;T = string&gt; {
-  readonly scope: T;
-  start: number;
-  end?: number;
-}
-
-type Scopes = ReadonlyMap&lt;string, number&gt;;
-
-enum Kind {
-  Keyword,
-  String,
-}
-
-export class Tokenizer implements Iterable&lt;Token&gt; {
-  #tokens: Token[] = [];
-
-  constructor(private readonly source: string) {}
-
-  tokenize(scopes: readonly string[]): Token[] {
-    return scopes
-      .map((scope, i): Token =&gt; ({ scope, start: i }))
-      .filter((token) =&gt; token.start &gt;= 0);
-  }
-
-  *[Symbol.iterator](): Iterator&lt;Token&gt; {
-    yield* this.#tokens;
-  }
-}
-
-const answer = 42 as const;
-await highlightAll();</code></pre>
-    </section>
-
-    <section class="sample" aria-labelledby="git-diff-label">
-      <div class="sample-label">
-        <h2 id="git-diff-label">Git diff</h2>
-      </div>
-      <pre lang="git-diff"><code>diff --git a/src/index.js b/src/index.js
-index 5c96d8e..55c1324 100644
+struct Token {
+    std::string scope;
+    int start = 0;
+};</code></pre>
+      </template>
+      <template data-lang="css" data-label="CSS">
+        <pre lang="css"><code>/* Theme a single token */
+::highlight(keyword) {
+  color: var(--syntax-keyword);
+}</code></pre>
+      </template>
+      <template data-lang="dart" data-label="Dart">
+        <pre lang="dart"><code>class Token {
+  final String scope;
+  final int start;
+  const Token(this.scope, {this.start = 0});
+}</code></pre>
+      </template>
+      <template data-lang="dockerfile" data-label="Dockerfile">
+        <pre lang="dockerfile"><code>FROM node:20-slim
+WORKDIR /app
+COPY . .
+RUN npm ci &amp;&amp; npm run build</code></pre>
+      </template>
+      <template data-lang="git-diff" data-label="Git diff">
+        <pre lang="git-diff"><code>diff --git a/src/index.js b/src/index.js
 --- a/src/index.js
 +++ b/src/index.js
-@@ -5,6 +5,7 @@ export { highlight };
- const aliases = {
-+  diff: "git-diff",
-   golang: "go",
--  htm: "html",
-+  html: "html",
- };</code></pre>
-    </section>
+@@ -1,2 +1,2 @@
+-const answer = 0;
++const answer = 42;</code></pre>
+      </template>
+      <template data-lang="go" data-label="Go">
+        <pre lang="go"><code>package main
 
-    <section class="sample" aria-labelledby="yaml-label">
-      <div class="sample-label">
-        <h2 id="yaml-label">YAML</h2>
-      </div>
-      <pre lang="yaml"><code># .github/workflows/ci.yml
-name: CI
+import "fmt"
 
-on:
-  push:
-    branches: [main]
-  pull_request:
+func main() {
+	fmt.Println("tokens:", 42)
+}</code></pre>
+      </template>
+      <template data-lang="graphql" data-label="GraphQL">
+        <pre lang="graphql"><code># Fetch a token by id
+query GetToken($id: ID!) {
+  token(id: $id) {
+    scope
+  }
+}</code></pre>
+      </template>
+      <template data-lang="html" data-label="HTML">
+        <pre lang="html"><code>&lt;!-- A comment stays a comment --&gt;
+&lt;button type="button" aria-pressed="false"&gt;42&lt;/button&gt;</code></pre>
+      </template>
+      <template data-lang="java" data-label="Java">
+        <pre lang="java"><code>public class Token {
+    String scope = "keyword";
+    int start = 0;
+}</code></pre>
+      </template>
+      <template data-lang="javascript" data-label="JavaScript">
+        <pre lang="javascript"><code>// Highlight everything on the page
+import { highlightAll } from "microlighter";
 
+await highlightAll();</code></pre>
+      </template>
+      <template data-lang="json" data-label="JSON">
+        <pre lang="json"><code>{
+  "name": "microlighter",
+  "version": "1.0.0"
+}</code></pre>
+      </template>
+      <template data-lang="kotlin" data-label="Kotlin">
+        <pre lang="kotlin"><code>data class Token(val scope: String, val start: Int = 0)</code></pre>
+      </template>
+      <template data-lang="lua" data-label="Lua">
+        <pre lang="lua"><code>-- Tokenize a tiny slice of source
+local function tokenize(source)
+    return source
+end</code></pre>
+      </template>
+      <template data-lang="markdown" data-label="Markdown">
+        <pre lang="markdown"><code># MicroLighter
+
+A **tiny** syntax highlighter for the [CSS Custom Highlight API](https://developer.mozilla.org/).</code></pre>
+      </template>
+      <template data-lang="objective-c" data-label="Objective-C">
+        <pre lang="objective-c"><code>@interface Token : NSObject
+@property (nonatomic, strong) NSString *scope;
+@end</code></pre>
+      </template>
+      <template data-lang="perl" data-label="Perl">
+        <pre lang="perl"><code>#!/usr/bin/env perl
+use strict;
+use warnings;
+
+my @tokens = split / /, "const x = 42";</code></pre>
+      </template>
+      <template data-lang="php" data-label="PHP">
+        <pre lang="php"><code>&lt;?php
+
+class Token {
+    public function __construct(private string $scope) {}
+}</code></pre>
+      </template>
+      <template data-lang="powershell" data-label="PowerShell">
+        <pre lang="powershell"><code># Rebuild dist/ and run the tests
+function Invoke-Build {
+    npm run build
+}</code></pre>
+      </template>
+      <template data-lang="python" data-label="Python">
+        <pre lang="python"><code>def tokenize(source: str) -&gt; list[str]:
+    """Split source into words."""
+    return source.split()</code></pre>
+      </template>
+      <template data-lang="r" data-label="R">
+        <pre lang="r"><code># Tokenize a tiny slice of source
+tokenize &lt;- function(source) {
+  strsplit(source, " ")
+}</code></pre>
+      </template>
+      <template data-lang="ruby" data-label="Ruby">
+        <pre lang="ruby"><code># Count tokens in a source string
+def tokenize(source)
+  source.split(" ")
+end</code></pre>
+      </template>
+      <template data-lang="rust" data-label="Rust">
+        <pre lang="rust"><code>/// A scoped span of source text.
+struct Token { scope: String, start: usize }
+
+fn main() {
+    let answer = 42;
+}</code></pre>
+      </template>
+      <template data-lang="scss" data-label="SCSS">
+        <pre lang="scss"><code>// Author a theme from a token map
+$keyword: #c792ea;
+
+@mixin syntax-theme($name) {
+  [data-syntax-theme="#{$name}"] {
+    --syntax-keyword: #{$keyword};
+  }
+}</code></pre>
+      </template>
+      <template data-lang="sql" data-label="SQL">
+        <pre lang="sql"><code>-- Find recent tokens
+SELECT id, scope FROM tokens
+WHERE start &gt;= 0
+LIMIT 10;</code></pre>
+      </template>
+      <template data-lang="swift" data-label="Swift">
+        <pre lang="swift"><code>struct Token {
+    let scope: String
+    var start = 0
+}</code></pre>
+      </template>
+      <template data-lang="toml" data-label="TOML">
+        <pre lang="toml"><code>name = "microlighter"
+version = "1.0.0"
+
+[dependencies]
+rollup = "4.46.2"</code></pre>
+      </template>
+      <template data-lang="tsx" data-label="TSX">
+        <pre lang="tsx"><code>function Badge({ label }: { label: string }) {
+  return &lt;span className="badge"&gt;{label}&lt;/span&gt;;
+}</code></pre>
+      </template>
+      <template data-lang="typescript" data-label="TypeScript">
+        <pre lang="typescript"><code>interface Token {
+  scope: string;
+  start: number;
+}
+
+const answer: number = 42;</code></pre>
+      </template>
+      <template data-lang="yaml" data-label="YAML">
+        <pre lang="yaml"><code>name: CI
+on: [push]
 jobs:
   test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
-      - run: npm test</code></pre>
+    runs-on: ubuntu-latest</code></pre>
+      </template>
+      </div>
     </section>
+
   </main>
 
   <footer aria-hidden="true"></footer>
@@ -983,6 +1166,37 @@ jobs:
     document.querySelector("#close-theme-code").addEventListener("click", () => {
       themeCodeDialog.close();
     });
+  </script>
+
+  <script>
+    // Every language lives as an inert <template> until it's picked, so only
+    // one sample (and its grammar) is ever live in the DOM at a time.
+    const playgroundSelect = document.querySelector("#playground-language");
+    const playgroundOutput = document.querySelector("#playground-output");
+    const playgroundTemplates = [...document.querySelectorAll(".playground-body > template")];
+    const defaultPlaygroundLanguage = "css";
+
+    playgroundTemplates.forEach(template => {
+      const option = document.createElement("option");
+      option.value = template.dataset.lang;
+      option.textContent = template.dataset.label;
+      playgroundSelect.append(option);
+    });
+
+    const renderPlaygroundSample = language => {
+      const template = playgroundTemplates.find(candidate => candidate.dataset.lang === language);
+      if (!template) return;
+
+      playgroundOutput.replaceChildren(template.content.cloneNode(true));
+      playgroundOutput.dispatchEvent(new CustomEvent("syntax-highlight", { bubbles: true }));
+    };
+
+    playgroundSelect.addEventListener("change", event => {
+      renderPlaygroundSample(event.target.value);
+    });
+
+    playgroundSelect.value = defaultPlaygroundLanguage;
+    renderPlaygroundSample(defaultPlaygroundLanguage);
   </script>
   <script type="module" src="./microlighter/microlighter.js"></script>
 </body>

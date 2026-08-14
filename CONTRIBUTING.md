@@ -56,7 +56,7 @@ per-token `<span>`s — ranges live in the CSS Custom Highlight registry.
 1. Add `src/grammars/<language>.js` exporting a TextMate grammar as the default
    export (it must include a `scopeName`).
 2. If the language is commonly referenced by an alias (e.g. `ts`, `yml`), add it
-   to the `aliases` map in `src/index.js`.
+   to the `aliases` map in `src/grammar-dependencies.js`.
 3. Add a code block for it to `docs/index.html` so it's covered by the demo and
    the tests.
 
