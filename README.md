@@ -98,8 +98,9 @@ automatically.
 
 ## Build
 
-Produce the distributable `dist/` folder (copied ESM source plus the minified
-single-file bundle `dist/microlighter.min.js`):
+Produce the distributable `dist/` folder (copied ESM modules plus unminified and
+minified single-file bundles at `dist/microlighter.js` and
+`dist/microlighter.min.js`):
 
 ```sh
 npm run build

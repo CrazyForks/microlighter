@@ -4,10 +4,8 @@ set -eu
 
 directory=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 dist="$directory/dist"
-bundle=$(mktemp "${TMPDIR:-/tmp}/microlighter.XXXXXX.js")
-output="$dist/microlighter.min.js"
-
-trap 'rm -f "$bundle"' EXIT
+bundle="$dist/microlighter.js"
+minified_bundle="$dist/microlighter.min.js"
 
 # Populate dist/ with the hand-authored ESM source (no transpile needed).
 rm -rf "$dist"
@@ -24,7 +22,7 @@ npx --yes terser@5.43.1 "$bundle" \
   --mangle \
   --module \
   --comments false \
-  --output "$output"
+  --output "$minified_bundle"
 
 # Vendor the built package into the docs/ site so GitHub Pages (source: /docs)
 # can serve a self-contained demo that loads the real distributable.

@@ -1,3 +1,4 @@
+/* Reference: Night Owl by Sarah Drasner (MIT) — https://github.com/sdras/night-owl-vscode-theme/blob/main/themes/Night%20Owl-color-theme.json */
 [data-syntax-theme="night-owl"] {
   --syntax-background: light-dark(#ffffff, #011627);
   --syntax-foreground: light-dark(#403f53, #d6deeb);

@@ -1,3 +1,4 @@
+// Reference: Microsoft VS Code (MIT) — https://github.com/microsoft/vscode/blob/main/extensions/go/syntaxes/go.tmLanguage.json
 export default {
   scopeName: "source.go",
   patterns: [
