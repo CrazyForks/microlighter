@@ -87,6 +87,10 @@ Bundled themes:
 - `monokai`
 - `night-owl`
 - `solarized-light`
+- `vesper`
+- `min`
+- `cobalt2`
+- `tokyo-night`
 
 ## Languages
 

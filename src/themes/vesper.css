@@ -1,25 +1,25 @@
-/* Reference: Solarized by Ethan Schoonover (MIT) — https://github.com/altercation/solarized/blob/master/textmate-colors-solarized/Solarized%20%28light%29.tmTheme */
-[data-syntax-theme="solarized-light"] {
-  --syntax-background: light-dark(#fdf6e3, #002b36);
-  --syntax-foreground: light-dark(#657b83, #93a1a1);
-  --syntax-comment: light-dark(#93a1a1, #586e75);
-  --syntax-keyword: light-dark(#859900, #b8c927);
-  --syntax-operator: light-dark(#859900, #b8c927);
-  --syntax-string: light-dark(#2aa198, #58c7bd);
-  --syntax-constant: light-dark(#d33682, #e26aa5);
-  --syntax-function: light-dark(#268bd2, #5eb7e5);
-  --syntax-type: light-dark(#b58900, #d9b72f);
-  --syntax-variable: light-dark(#657b83, #93a1a1);
-  --syntax-property: light-dark(#268bd2, #5eb7e5);
-  --syntax-tag: light-dark(#268bd2, #5eb7e5);
-  --syntax-selector: light-dark(#268bd2, #5eb7e5);
-  --syntax-inserted: light-dark(#2aa198, #58c7bd);
-  --syntax-deleted: light-dark(#859900, #b8c927);
+/* Reference: Vesper by Rauno Freiberg (MIT) — https://github.com/raunofreiberg/vesper/blob/main/themes/Vesper-dark-color-theme.json */
+[data-syntax-theme="vesper"] {
+  --syntax-background: light-dark(#ffffff, #101010);
+  --syntax-foreground: light-dark(#101010, #ffffff);
+  --syntax-comment: light-dark(#707070, #8b8b8b);
+  --syntax-keyword: light-dark(#606060, #a0a0a0);
+  --syntax-operator: light-dark(#606060, #a0a0a0);
+  --syntax-string: light-dark(#007a61, #99ffe4);
+  --syntax-constant: light-dark(#9a5b24, #ffc799);
+  --syntax-function: light-dark(#9a5b24, #ffc799);
+  --syntax-type: light-dark(#9a5b24, #ffc799);
+  --syntax-variable: light-dark(#101010, #ffffff);
+  --syntax-property: light-dark(#101010, #ffffff);
+  --syntax-tag: light-dark(#9a5b24, #ffc799);
+  --syntax-selector: light-dark(#9a5b24, #ffc799);
+  --syntax-inserted: light-dark(#007a61, #99ffe4);
+  --syntax-deleted: light-dark(#b42318, #ff8080);
 
   color-scheme: light dark;
 }
 
-[data-syntax-theme="solarized-light"] pre:has(code) {
+[data-syntax-theme="vesper"] pre:has(code) {
   background-color: var(--syntax-background);
   color: var(--syntax-foreground);
 }

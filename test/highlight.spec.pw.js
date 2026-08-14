@@ -58,22 +58,38 @@ test.describe("MicroLighter demo site (docs/index.html)", () => {
     expect(diffHighlights.keywords).toEqual([]);
   });
 
-  test("re-highlights after switching themes via the syntax-highlight event", async ({ page }) => {
+  test("loads every bundled theme without changing highlight ranges", async ({ page }) => {
     await page.goto("/", { waitUntil: "networkidle" });
 
     const before = await readHighlights(page);
+    const themes = await page.locator("#theme option").evaluateAll(options =>
+      options.map(option => option.value)
+    );
 
-    await page.evaluate(() => {
-      document.documentElement.dataset.syntaxTheme = "dracula";
-      document.dispatchEvent(new Event("syntax-highlight"));
-    });
-    await page.waitForTimeout(200);
+    for (const theme of themes) {
+      await page.selectOption("#theme", theme);
 
-    const theme = await page.evaluate(() => document.documentElement.dataset.syntaxTheme);
-    const after = await readHighlights(page);
+      const styles = await page.evaluate(() => {
+        const root = getComputedStyle(document.documentElement);
+        const code = getComputedStyle(document.querySelector("pre[lang]"));
+        return {
+          theme: document.documentElement.dataset.syntaxTheme,
+          background: root.getPropertyValue("--syntax-background").trim(),
+          foreground: root.getPropertyValue("--syntax-foreground").trim(),
+          inserted: root.getPropertyValue("--syntax-inserted").trim(),
+          deleted: root.getPropertyValue("--syntax-deleted").trim(),
+          codeBackground: code.backgroundColor
+        };
+      });
 
-    expect(theme).toBe("dracula");
-    expect(after.total).toBe(before.total);
+      expect(styles.theme).toBe(theme);
+      expect(styles.background).not.toBe("");
+      expect(styles.foreground).not.toBe("");
+      expect(styles.inserted).not.toBe("");
+      expect(styles.deleted).not.toBe("");
+      expect(styles.codeBackground).not.toBe("rgba(0, 0, 0, 0)");
+      expect((await readHighlights(page)).total).toBe(before.total);
+    }
   });
 
   test("removes stale ranges when code blocks disappear", async ({ page }) => {
