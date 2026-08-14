@@ -320,6 +320,62 @@
       text-transform: none;
     }
 
+    .install {
+      display: grid;
+      grid-template-columns: 8rem minmax(0, 1fr);
+      gap: 1.5rem;
+      padding-block: 2rem;
+      border-bottom: 1px solid var(--page-border);
+    }
+
+    .install-label {
+      padding-top: 1rem;
+      color: var(--page-muted);
+    }
+
+    .install-steps {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .install-steps p {
+      max-width: 68ch;
+      color: var(--page-muted);
+      font-size: 0.85rem;
+      line-height: 1.7;
+    }
+
+    .install-steps a {
+      width: fit-content;
+      color: var(--syntax-function);
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-underline-offset: 0.25em;
+    }
+
+    .install-steps pre {
+      min-height: 0;
+    }
+
+    .samples-heading {
+      display: grid;
+      gap: 0.75rem;
+      padding-block: 3rem 2rem;
+      border-bottom: 1px solid var(--page-border);
+    }
+
+    .samples-heading h2 {
+      font-size: clamp(1.75rem, 4vw, 3rem);
+      line-height: 1;
+      text-transform: none;
+    }
+
+    .samples-heading p {
+      color: var(--page-muted);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
     .sample {
       display: grid;
       grid-template-columns: 8rem minmax(0, 1fr);
@@ -349,9 +405,7 @@
     }
 
     footer {
-      padding-block: 1.5rem 3rem;
-      color: var(--page-muted);
-      font-size: 0.75rem;
+      padding-bottom: 3rem;
     }
 
     @media (max-width: 52rem) {
@@ -380,11 +434,13 @@
         border-block-start: 2px solid var(--syntax-keyword);
       }
 
+      .install,
       .sample {
         grid-template-columns: 1fr;
         gap: 0.75rem;
       }
 
+      .install-label,
       .sample-label {
         padding-top: 0;
       }
@@ -494,6 +550,29 @@
         </div>
         <h2>CSS for humans!!!1</h2>
       </article>
+    </section>
+
+    <section class="install" aria-labelledby="install-label">
+      <div class="install-label">
+        <h2 id="install-label">Install</h2>
+      </div>
+      <div class="install-steps">
+        <p>Add MicroLighter to your project, import a theme, then highlight every <code>pre[lang] &gt; code</code> block on the page.</p>
+        <pre><code>npm install microlighter</code></pre>
+        <pre lang="javascript"><code>import { highlightAll } from "microlighter";
+import "microlighter/themes/github.css";
+
+await highlightAll();</code></pre>
+        <pre lang="html"><code>&lt;pre lang="javascript"&gt;&lt;code&gt;const answer = 42;&lt;/code&gt;&lt;/pre&gt;</code></pre>
+        <p>Prefer automatic setup? Import the minified auto-runner instead. It highlights the page immediately and re-highlights when a <code>syntax-highlight</code> event is dispatched.</p>
+        <pre lang="javascript"><code>import "microlighter/microlighter.min.js";</code></pre>
+        <a href="https://github.com/davatron5000/microlighter#readme">Read more in the docs</a>
+      </div>
+    </section>
+
+    <section class="samples-heading" aria-labelledby="samples-heading">
+      <h2 id="samples-heading">Code samples</h2>
+      <p>Supports the TextMate grammar format used by VS Code.</p>
     </section>
 
     <section class="sample" aria-labelledby="markup-label">
@@ -843,7 +922,7 @@ jobs:
     </section>
   </main>
 
-  <footer>CSS Custom Highlight API + TextMate grammar rules</footer>
+  <footer aria-hidden="true"></footer>
 
   <dialog id="theme-code-dialog" aria-labelledby="theme-code-title">
     <div class="dialog-bar">
