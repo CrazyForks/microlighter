@@ -1,10 +1,27 @@
+const languageAliases = {
+  docker: "dockerfile",
+  gql: "graphql",
+  js: "javascript",
+  jsx: "javascript",
+  md: "markdown",
+  py: "python",
+  rb: "ruby",
+  sass: "scss",
+  sh: "bash",
+  shell: "bash",
+  ts: "typescript",
+  yml: "yaml",
+  zsh: "bash"
+};
+
 /**
  * Convert a supported language alias to its grammar module name.
  * @param {string} language
- * @param {Object<string, string>} aliases
+ * @param {Object<string, string>} [aliases]
  * @returns {string}
  */
-export const normalizeLanguage = (language, aliases) => aliases[language] || language;
+export const normalizeLanguage = (language, aliases = {}) =>
+  aliases[language] || languageAliases[language] || language;
 
 /**
  * Find grammar modules referenced by external TextMate scope includes.
@@ -44,7 +61,7 @@ const grammarFor = language => import(`./grammars/${language}.js`)
 /**
  * Create a cached loader that also resolves external grammar dependencies.
  * @param {(language: string) => Promise<Object | null>} [importLanguage]
- * @returns {(languages: string[]) => Promise<{
+ * @returns {(languages: string[], aliases?: Object<string, string>) => Promise<{
  *   byLanguage: Object<string, Object>,
  *   byScope: Map<string, Object>
  * }>}
@@ -55,16 +72,13 @@ export const createGrammarLoader = (importLanguage = grammarFor) => {
     byLanguage: {},
     byScope: new Map()
   };
-  let aliasesModule;
 
-  const normalizeLanguages = async languages => {
-    aliasesModule ||= import(`./${"language-aliases"}.js`);
-    const { default: aliases } = await aliasesModule;
-    return [...new Set(languages)].map(requested => ({
+  const normalizeLanguages = (languages, aliases) =>
+    [...new Set(languages)].map(requested => ({
       requested,
       canonical: normalizeLanguage(requested, aliases)
     })).filter(({ canonical }) => /^[a-z0-9_-]+$/.test(canonical));
-  };
+
   /**
    * Import and index a grammar once for the lifetime of this loader.
    * @param {string} language
@@ -85,8 +99,8 @@ export const createGrammarLoader = (importLanguage = grammarFor) => {
     return grammarModules.get(language);
   };
 
-  return async languages => {
-    const requestedLanguages = await normalizeLanguages(languages);
+  return async (languages, aliases = {}) => {
+    const requestedLanguages = normalizeLanguages(languages, aliases);
     let pendingLanguages = requestedLanguages
       .map(({ canonical }) => canonical)
       .filter(language => !grammarModules.has(language));

@@ -245,7 +245,7 @@ test.describe("MicroLighter demo site (docs/index.html)", () => {
     ]));
   });
 
-  test("accepts exported and custom language aliases through the import API", async ({ page }) => {
+  test("accepts built-in and custom language aliases through the import API", async ({ page }) => {
     await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
 
     const highlighted = await page.evaluate(async () => {
@@ -257,12 +257,9 @@ test.describe("MicroLighter demo site (docs/index.html)", () => {
       document.body.append(root);
 
       const { highlightAll } = await import("/docs/microlighter/index.js");
-      const { default: languageAliases } =
-        await import("/docs/microlighter/language-aliases.js");
       await highlightAll({
         root,
         languageAliases: {
-          ...languageAliases,
           ecmascript: "javascript"
         }
       });

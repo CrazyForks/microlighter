@@ -6,7 +6,6 @@ import {
   externalLanguagesFor,
   normalizeLanguage
 } from "../src/grammar-dependencies.js";
-import languageAliases from "../src/language-aliases.js";
 import cpp from "../src/grammars/cpp.js";
 import html from "../src/grammars/html.js";
 import markdown from "../src/grammars/markdown.js";
@@ -50,24 +49,10 @@ test("recognizes source and text scopes but ignores unsupported includes", () =>
 });
 
 test("normalizes language aliases and preserves canonical names", () => {
-  assert.deepEqual(languageAliases, {
-    docker: "dockerfile",
-    gql: "graphql",
-    js: "javascript",
-    jsx: "javascript",
-    md: "markdown",
-    py: "python",
-    rb: "ruby",
-    sass: "scss",
-    sh: "bash",
-    shell: "bash",
-    ts: "typescript",
-    yml: "yaml",
-    zsh: "bash"
-  });
-  assert.equal(normalizeLanguage("jsx", languageAliases), "javascript");
-  assert.equal(normalizeLanguage("sass", languageAliases), "scss");
-  assert.equal(normalizeLanguage("python", languageAliases), "python");
+  assert.equal(normalizeLanguage("jsx"), "javascript");
+  assert.equal(normalizeLanguage("sass"), "scss");
+  assert.equal(normalizeLanguage("python"), "python");
+  assert.equal(normalizeLanguage("custom-language"), "custom-language");
 });
 
 test("reports dependencies used by the shipped grammars", () => {
@@ -107,6 +92,35 @@ test("loads external dependencies once and indexes grammars by language and scop
   assert.deepEqual(loaded.byLanguage, grammarFixtures);
   assert.equal(loaded.byScope.get("text.html"), grammarFixtures.html);
   assert.equal(loaded.byScope.get("source.js"), grammarFixtures.javascript);
+});
+
+test("loads user-provided canonical language names", async () => {
+  const customGrammar = { scopeName: "source.custom", patterns: [] };
+  const load = createGrammarLoader(async language =>
+    language === "custom-language" ? customGrammar : null
+  );
+
+  const loaded = await load(["custom-language"]);
+
+  assert.equal(loaded.byLanguage["custom-language"], customGrammar);
+});
+
+test("merges core and user-provided language aliases", async () => {
+  const grammarFixtures = {
+    javascript: { scopeName: "source.js", patterns: [] },
+    json: { scopeName: "source.json", patterns: [] }
+  };
+  const importedLanguages = [];
+  const load = createGrammarLoader(async language => {
+    importedLanguages.push(language);
+    return grammarFixtures[language] ?? null;
+  });
+
+  const loaded = await load(["js", "jsonc"], { jsonc: "json" });
+
+  assert.deepEqual(importedLanguages, ["javascript", "json"]);
+  assert.equal(loaded.byLanguage.js, grammarFixtures.javascript);
+  assert.equal(loaded.byLanguage.jsonc, grammarFixtures.json);
 });
 
 test("dynamically loads every new canonical grammar and transitively resolves its dependencies", async () => {

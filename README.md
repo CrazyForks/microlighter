@@ -24,21 +24,11 @@ for compatibility but is deprecated because HTML's `lang` attribute describes
 human language.
 
 Common aliases work automatically in both the import API and auto-run bundles.
-The same map is exported as a **get out of jail free card** when composing
-project-specific aliases:
-
-```js
-import languageAliases from "microlighter/language-aliases";
-
-console.log(languageAliases.jsx); // "javascript"
-```
-
-The map can be extended with project-specific names:
+Project-specific names can be supplied through the import API:
 
 ```js
 await highlightAll({
   languageAliases: {
-    ...languageAliases,
     ecmascript: "javascript",
     shellsession: "bash"
   }
