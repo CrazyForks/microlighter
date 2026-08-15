@@ -8,11 +8,12 @@ const highlights = new Map();
 /**
  * Convert TextMate grammar matches into CSS Custom Highlight ranges.
  * @param {HTMLElement[]} blocks Code elements containing one text node each.
- * @param {(code: HTMLElement) => Object | undefined} getGrammar Grammar lookup.
- * @param {Map<string, Object>} grammarScopes External include lookup.
+ * @param {{languages: Object<string, Object>, scopes: Map<string, Object>}} grammars
+ * Loaded grammar indexes.
+ * @param {(code: HTMLElement) => string} getLanguage Canonical language lookup.
  * @returns {void}
  */
-export const highlight = (blocks, getGrammar, grammarScopes) => {
+export const highlight = (blocks, grammars, getLanguage) => {
   const regexes = new Map();
 
   highlights.forEach((ranges, category) => {
@@ -144,7 +145,7 @@ export const highlight = (blocks, getGrammar, grammarScopes) => {
     }
 
     const [scopeName, repositoryName] = include.split("#");
-    const includedGrammar = grammarScopes.get(scopeName);
+    const includedGrammar = grammars.scopes.get(scopeName);
     if (!includedGrammar) return null;
 
     return {
@@ -267,7 +268,7 @@ export const highlight = (blocks, getGrammar, grammarScopes) => {
   };
 
   blocks.forEach(code => {
-    const grammar = getGrammar(code);
+    const grammar = grammars.languages[getLanguage(code)];
     const node = code.firstChild;
     if (!grammar || code.childNodes.length !== 1 || node.nodeType !== Node.TEXT_NODE) return;
 

@@ -101,7 +101,11 @@ test.describe("MicroLighter demo site (docs/index.html)", () => {
           name: scope
         }))
       };
-      highlight([code], () => grammar, new Map());
+      const grammars = {
+        languages: { test: grammar },
+        scopes: new Map()
+      };
+      highlight([code], grammars, () => "test");
 
       return Object.fromEntries(
         [...CSS.highlights].map(([category, ranges]) => [

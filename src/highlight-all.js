@@ -19,13 +19,15 @@ export const getLanguage = code => {
 };
 export const loadGrammars = createGrammarLoader();
 
-export const highlightAll = async ({ root = document, selector = "pre > code" } = {}) => {
+export const highlightAll = async ({
+  root = document,
+  selector = "pre > code",
+  languageAliases
+} = {}) => {
   const codeBlocks = [...root.querySelectorAll(selector)].filter(getLanguage);
-  const language = code => normalizeLanguage(getLanguage(code));
-  const languages = [...new Set(codeBlocks.map(language))]
-    .filter(language => /^[a-z0-9_-]+$/.test(language));
-  const grammars = await loadGrammars(languages);
+  const language = code => normalizeLanguage(getLanguage(code), languageAliases);
+  const grammars = await loadGrammars(codeBlocks.map(language));
 
-  highlight(codeBlocks, code => grammars.languages[language(code)], grammars.scopes);
+  highlight(codeBlocks, grammars, language);
   return codeBlocks;
 };
