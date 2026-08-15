@@ -22,3 +22,15 @@ test("includes first-party language aliases in the core bundle", async () => {
 
   assert.match(bundle, /jsx:"javascript"/);
 });
+
+test("build emits complete custom-element bundles", async () => {
+  const [bundle, minifiedBundle] = await Promise.all([
+    readFile(new URL("../dist/micro-lighter-element.js", import.meta.url), "utf8"),
+    readFile(new URL("../dist/micro-lighter-element.min.js", import.meta.url), "utf8")
+  ]);
+
+  assert.doesNotMatch(bundle, /from\s+["']\.\/highlight-all\.js["']/);
+  assert.match(bundle, /customElements\.define\(["']micro-lighter["']/);
+  assert.match(minifiedBundle, /customElements\.define\(["']micro-lighter["']/);
+  assert.ok(bundle.length > minifiedBundle.length);
+});

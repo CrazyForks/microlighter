@@ -25,6 +25,103 @@ const readHighlights = page =>
   });
 
 test.describe("MicroLighter demo site (docs/index.html)", () => {
+  test("renders the custom element demo page", async ({ page }) => {
+    await page.goto("/docs/custom-element.html", { waitUntil: "networkidle" });
+
+    await expect(page.locator("micro-lighter")).toHaveCount(3);
+    await expect(page.getByRole("button", { name: "Copy" })).toHaveCount(3);
+
+    await expect.poll(() => page.evaluate(() => {
+      let total = 0;
+      for (const highlight of CSS.highlights.values()) total += highlight.size;
+      return total;
+    })).toBeGreaterThan(0);
+
+    await page.selectOption("#theme", "dracula");
+    await expect(page.locator("html")).toHaveAttribute("data-syntax-theme", "dracula");
+
+    expect(await page.evaluate(() => {
+      return document.documentElement.scrollWidth <= document.documentElement.clientWidth;
+    })).toBe(true);
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    expect(await page.evaluate(() => {
+      return document.documentElement.scrollWidth <= document.documentElement.clientWidth;
+    })).toBe(true);
+  });
+
+  test("supports the micro-lighter custom element", async ({ page }) => {
+    await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
+
+    await page.evaluate(async () => {
+      window.copyWrites = [];
+      window.notifications = [];
+      Object.defineProperty(navigator, "clipboard", {
+        configurable: true,
+        value: { writeText: value => window.copyWrites.push(value) }
+      });
+      Object.defineProperty(HTMLElement.prototype, "ariaNotify", {
+        configurable: true,
+        value(message) {
+          window.notifications.push(message);
+        }
+      });
+
+      await import("/docs/microlighter/micro-lighter-element.min.js");
+      document.body.insertAdjacentHTML("beforeend", `
+        <micro-lighter id="explicit" language="javascript" controls="copy">
+          <pre><code data-language="python">const explicit = true;</code></pre>
+        </micro-lighter>
+        <micro-lighter id="inferred">
+          <pre><code class="language-javascript">const inferred = true;</code></pre>
+        </micro-lighter>
+      `);
+    });
+
+    await expect.poll(() => page.evaluate(() => {
+      const highlighted = new Set();
+      for (const ranges of CSS.highlights.values()) {
+        for (const range of ranges) {
+          const id = range.startContainer.parentElement?.closest("micro-lighter")?.id;
+          if (id) highlighted.add(id);
+        }
+      }
+      return [...highlighted].sort();
+    })).toEqual(["explicit", "inferred"]);
+
+    expect(await page.locator("#explicit code").getAttribute("data-language"))
+      .toBe("javascript");
+
+    expect(await page.locator("#explicit").evaluate(element => {
+      const button = getComputedStyle(element.shadowRoot.querySelector("button"));
+      const pre = getComputedStyle(element.querySelector("pre"));
+      return {
+        backgroundMatches: button.backgroundColor === pre.backgroundColor,
+        borderStyle: button.borderStyle,
+        colorMatches: button.color === pre.color
+      };
+    })).toEqual({
+      backgroundMatches: true,
+      borderStyle: "solid",
+      colorMatches: true
+    });
+
+    await page.locator("#explicit button").click();
+    await expect(page.locator("#explicit button")).toHaveText("Copied");
+    expect(await page.evaluate(() => ({
+      notifications: window.notifications,
+      writes: window.copyWrites
+    }))).toEqual({
+      notifications: ["Copied to clipboard"],
+      writes: ["const explicit = true;"]
+    });
+    await expect(page.locator("#inferred button")).toBeHidden();
+
+    await page.locator("#explicit").evaluate(element => element.removeAttribute("language"));
+    await expect.poll(() => page.locator("#explicit code").getAttribute("data-language"))
+      .toBe("python");
+  });
+
   test("registers highlight ranges across every code block", async ({ page }) => {
     await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
 

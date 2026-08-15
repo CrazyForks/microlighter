@@ -14,7 +14,9 @@
   ],
   "sideEffects": [
     "./dist/microlighter.js",
-    "./dist/microlighter.min.js"
+    "./dist/microlighter.min.js",
+    "./dist/micro-lighter-element.js",
+    "./dist/micro-lighter-element.min.js"
   ],
   "sizeLimit": {
     "dist/microlighter.min.js": 2100

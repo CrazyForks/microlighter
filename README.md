@@ -37,6 +37,29 @@ await highlightAll({
 
 Alias targets must be names of shipped grammars.
 
+### Web component
+
+The opt-in `microlighter/micro-lighter-element.min.js` bundle registers a
+`<micro-lighter>` custom element. A readable `micro-lighter-element.js` bundle
+is also available. The element keeps the `<pre><code>` content in the light DOM,
+so the same highlighter and theme styles work without replacing the code with
+token markup:
+
+```html
+<link rel="stylesheet" href="./node_modules/microlighter/themes/github.css">
+<script type="module" src="./node_modules/microlighter/micro-lighter-element.min.js"></script>
+
+<micro-lighter language="javascript" controls="copy">
+  <pre><code>const answer = 42;</code></pre>
+</micro-lighter>
+```
+
+The element's `language` attribute takes precedence when present. Without it,
+the component uses the standard `language-*` class or `data-language` metadata
+on the nested `<code>` or `<pre>`. `controls` accepts comma- or space-separated
+control names. The `copy` control adds a copy button. Style it with
+`micro-lighter::part(copy-button)`.
+
 ### 1. Auto (drop-in)
 
 The auto-run entry (`microlighter/microlighter.js`, or the minified
