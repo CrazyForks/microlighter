@@ -175,8 +175,9 @@ npm test
 ```
 
 `npm test` first rebuilds `dist/` and the generated `docs/microlighter/` copy so
-tests run against current code. Updating the headline gzip size on the demo homepage
-(`docs/index.html`) is a separate, explicit step — it is never done automatically:
+tests run against current code. The pre-commit hook updates and stages the headline
+gzip size on the demo homepage (`docs/index.html`) automatically. To update it
+explicitly without committing, run:
 
 ```sh
 npm run docs:update-homepage-stats

@@ -87,8 +87,11 @@ current code.
 
 ## Updating the homepage size figure
 
-The headline gzip number on the demo homepage is **not** updated automatically.
-When a change moves the bundle size, refresh it explicitly and commit the diff:
+`npm install` configures the tracked pre-commit hook in `.githooks/`. Before each
+commit, it rebuilds the package, updates the headline gzip number on the demo
+homepage, and stages that generated change.
+
+To refresh it explicitly without committing, run:
 
 ```sh
 npm run docs:update-homepage-stats

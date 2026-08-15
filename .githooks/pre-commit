@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -eu
+
+if command -v npm >/dev/null 2>&1; then
+	npm run docs:update-homepage-stats
+	git add -- docs/index.html
+else
+	exec "${SHELL:-/bin/sh}" -lc \
+		'npm run docs:update-homepage-stats && git add -- docs/index.html'
+fi
