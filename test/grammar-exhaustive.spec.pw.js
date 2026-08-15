@@ -81,14 +81,14 @@ test.describe("Grammar exhaustive fixture (test/fixtures/grammar-exhaustive.html
     await page.goto(FIXTURE, { waitUntil: "networkidle" });
 
     const diffHighlights = await page.evaluate(() => {
-      const linesFor = category => [...CSS.highlights.get(category) ?? []]
+      const getLines = category => [...CSS.highlights.get(category) ?? []]
         .filter(range => range.startContainer.parentElement?.closest("pre > code.language-git-diff"))
         .map(range => range.toString());
 
       return {
-        inserted: linesFor("inserted"),
-        deleted: linesFor("deleted"),
-        keywords: linesFor("keyword")
+        inserted: getLines("inserted"),
+        deleted: getLines("deleted"),
+        keywords: getLines("keyword")
       };
     });
 
@@ -101,15 +101,15 @@ test.describe("Grammar exhaustive fixture (test/fixtures/grammar-exhaustive.html
     await page.goto(FIXTURE, { waitUntil: "networkidle" });
 
     const componentHighlights = await page.evaluate(() => {
-      const rangesFor = (language, category) => [...CSS.highlights.get(category) ?? []]
+      const getRanges = (language, category) => [...CSS.highlights.get(category) ?? []]
         .filter(range => range.startContainer.parentElement?.closest(`code.language-${language}`))
         .map(range => range.toString());
 
       return {
-        svelteAttributes: rangesFor("svelte", "attribute-name"),
-        svelteKeywords: rangesFor("svelte", "keyword"),
-        vueAttributes: rangesFor("vue", "attribute-name"),
-        vueStorage: rangesFor("vue", "storage")
+        svelteAttributes: getRanges("svelte", "attribute-name"),
+        svelteKeywords: getRanges("svelte", "keyword"),
+        vueAttributes: getRanges("vue", "attribute-name"),
+        vueStorage: getRanges("vue", "storage")
       };
     });
 

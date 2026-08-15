@@ -1,5 +1,6 @@
 import { highlight } from "./highlight.js";
-import { languageFor, loadGrammars } from "./highlight-all.js";
+import { getLanguage, loadGrammars } from "./highlight-all.js";
+import { normalizeLanguage } from "./grammar-dependencies.js";
 
 /**
  * Scan the DOM for code blocks, lazily load the grammars they need, and
@@ -17,11 +18,12 @@ export const highlightAll = async ({
   selector = "pre > code",
   languageAliases
 } = {}) => {
-  const codeBlocks = [...root.querySelectorAll(selector)].filter(languageFor);
-  const languages = [...new Set(codeBlocks.map(languageFor))]
+  const codeBlocks = [...root.querySelectorAll(selector)].filter(getLanguage);
+  const language = code => normalizeLanguage(getLanguage(code), languageAliases);
+  const languages = [...new Set(codeBlocks.map(language))]
     .filter(language => /^[a-z0-9_-]+$/.test(language));
-  const grammars = await loadGrammars(languages, languageAliases);
+  const grammars = await loadGrammars(languages);
 
-  highlight(codeBlocks, code => grammars.byLanguage[languageFor(code)], grammars.byScope);
+  highlight(codeBlocks, code => grammars.languages[language(code)], grammars.scopes);
   return codeBlocks;
 };

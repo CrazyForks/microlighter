@@ -29,7 +29,7 @@ export const normalizeLanguage = (language, aliases = {}) =>
  * @param {*} value Grammar or nested grammar rule to inspect.
  * @returns {Set<string>} Normalized grammar module names.
  */
-export const externalLanguagesFor = value => {
+export const getExternalLanguages = value => {
   const languages = new Set();
 
   const visit = item => {
@@ -54,30 +54,24 @@ export const externalLanguagesFor = value => {
  * @param {string} language
  * @returns {Promise<Object | null>}
  */
-const grammarFor = language => import(`./grammars/${language}.js`)
+const getGrammar = language => import(`./grammars/${language}.js`)
   .then(module => module.default)
   .catch(() => null);
 
 /**
  * Create a cached loader that also resolves external grammar dependencies.
  * @param {(language: string) => Promise<Object | null>} [importLanguage]
- * @returns {(languages: string[], aliases?: Object<string, string>) => Promise<{
- *   byLanguage: Object<string, Object>,
- *   byScope: Map<string, Object>
+ * @returns {(languages: string[]) => Promise<{
+ *   languages: Object<string, Object>,
+ *   scopes: Map<string, Object>
  * }>}
  */
-export const createGrammarLoader = (importLanguage = grammarFor) => {
-  const grammarModules = new Map();
+export const createGrammarLoader = (importLanguage = getGrammar) => {
+  const loadingLanguages = new Map();
   const grammars = {
-    byLanguage: {},
-    byScope: new Map()
+    languages: {},
+    scopes: new Map()
   };
-
-  const normalizeLanguages = (languages, aliases) =>
-    [...new Set(languages)].map(requested => ({
-      requested,
-      canonical: normalizeLanguage(requested, aliases)
-    })).filter(({ canonical }) => /^[a-z0-9_-]+$/.test(canonical));
 
   /**
    * Import and index a grammar once for the lifetime of this loader.
@@ -85,38 +79,32 @@ export const createGrammarLoader = (importLanguage = grammarFor) => {
    * @returns {Promise<Object | null>}
    */
   const loadGrammar = language => {
-    if (!grammarModules.has(language)) {
+    if (!loadingLanguages.has(language)) {
       const grammarModule = importLanguage(language).then(grammar => {
         if (grammar) {
-          grammars.byLanguage[language] = grammar;
-          grammars.byScope.set(grammar.scopeName, grammar);
+          grammars.languages[language] = grammar;
+          grammars.scopes.set(grammar.scopeName, grammar);
         }
         return grammar;
       });
-      grammarModules.set(language, grammarModule);
+      loadingLanguages.set(language, grammarModule);
     }
 
-    return grammarModules.get(language);
+    return loadingLanguages.get(language);
   };
 
-  return async (languages, aliases = {}) => {
-    const requestedLanguages = normalizeLanguages(languages, aliases);
-    let pendingLanguages = requestedLanguages
-      .map(({ canonical }) => canonical)
-      .filter(language => !grammarModules.has(language));
+  return async languages => {
+    const visited = new Set();
+    let pending = [...new Set(languages)]
+      .filter(language => /^[a-z0-9_-]+$/.test(language));
 
-    while (pendingLanguages.length) {
-      const loadedGrammars = (await Promise.all(pendingLanguages.map(loadGrammar))).filter(Boolean);
-      pendingLanguages = [...new Set(loadedGrammars.flatMap(grammar =>
-        grammar.dependencies || [...externalLanguagesFor(grammar)]
-      ))].filter(language => !grammarModules.has(language));
+    while (pending.length) {
+      pending.forEach(language => visited.add(language));
+      const loaded = (await Promise.all(pending.map(loadGrammar))).filter(Boolean);
+      pending = [...new Set(loaded.flatMap(grammar =>
+        grammar.dependencies || [...getExternalLanguages(grammar)]
+      ))].map(normalizeLanguage).filter(language => !visited.has(language));
     }
-
-    requestedLanguages.forEach(({ requested, canonical }) => {
-      if (grammars.byLanguage[canonical]) {
-        grammars.byLanguage[requested] = grammars.byLanguage[canonical];
-      }
-    });
 
     return grammars;
   };

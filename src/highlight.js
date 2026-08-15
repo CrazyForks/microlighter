@@ -8,11 +8,11 @@ const highlights = new Map();
 /**
  * Convert TextMate grammar matches into CSS Custom Highlight ranges.
  * @param {HTMLElement[]} blocks Code elements containing one text node each.
- * @param {(code: HTMLElement) => Object | undefined} grammarFor Grammar lookup.
- * @param {Map<string, Object>} grammarsByScope External include lookup.
+ * @param {(code: HTMLElement) => Object | undefined} getGrammar Grammar lookup.
+ * @param {Map<string, Object>} grammarScopes External include lookup.
  * @returns {void}
  */
-export const highlight = (blocks, grammarFor, grammarsByScope) => {
+export const highlight = (blocks, getGrammar, grammarScopes) => {
   const regexes = new Map();
 
   highlights.forEach((ranges, category) => {
@@ -25,7 +25,7 @@ export const highlight = (blocks, grammarFor, grammarsByScope) => {
    * @param {string} scope
    * @returns {string | undefined}
    */
-  const categoryFor = scope => {
+  const getCategory = scope => {
     const parts = scope.split(".");
     const [first, second, third] = parts;
     const last = parts.at(-1);
@@ -58,7 +58,7 @@ export const highlight = (blocks, grammarFor, grammarsByScope) => {
    * @returns {void}
    */
   const addRange = (node, start, end, scope) => {
-    const category = categoryFor(scope);
+    const category = getCategory(scope);
     if (!category || start === end) return;
 
     const range = new Range();
@@ -121,7 +121,7 @@ export const highlight = (blocks, grammarFor, grammarsByScope) => {
    * @param {*} rule
    * @returns {Object[]}
    */
-  const rulesFor = rule => {
+  const getRules = rule => {
     if (!rule) return [];
     if (Array.isArray(rule)) return rule;
     if (rule.match || rule.begin || rule.include) return [rule];
@@ -140,17 +140,17 @@ export const highlight = (blocks, grammarFor, grammarsByScope) => {
     if (include === "$base") return { grammar: baseGrammar, rules: baseGrammar.patterns };
 
     if (include.startsWith("#")) {
-      return { grammar, rules: rulesFor(grammar.repository?.[include.slice(1)]) };
+      return { grammar, rules: getRules(grammar.repository?.[include.slice(1)]) };
     }
 
     const [scopeName, repositoryName] = include.split("#");
-    const includedGrammar = grammarsByScope.get(scopeName);
+    const includedGrammar = grammarScopes.get(scopeName);
     if (!includedGrammar) return null;
 
     return {
       grammar: includedGrammar,
       rules: repositoryName
-        ? rulesFor(includedGrammar.repository?.[repositoryName])
+        ? getRules(includedGrammar.repository?.[repositoryName])
         : includedGrammar.patterns
     };
   };
@@ -267,7 +267,7 @@ export const highlight = (blocks, grammarFor, grammarsByScope) => {
   };
 
   blocks.forEach(code => {
-    const grammar = grammarFor(code);
+    const grammar = getGrammar(code);
     const node = code.firstChild;
     if (!grammar || code.childNodes.length !== 1 || node.nodeType !== Node.TEXT_NODE) return;
 

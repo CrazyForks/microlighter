@@ -87,7 +87,7 @@ const minify = (code, { css = false } = {}) => {
   return out;
 };
 
-const sizesFor = path => {
+const getSizes = path => {
   const buffer = readFileSync(join(root, path));
   return { raw: buffer.length, gzip: gzip(buffer), brotli: brotli(buffer) };
 };
@@ -111,7 +111,7 @@ const printTable = (title, rows, columns) => {
 };
 
 const bundle = "dist/microlighter.min.js";
-const bundleSizes = sizesFor(bundle);
+const bundleSizes = getSizes(bundle);
 
 printTable(
   "Bundle (microlighter.min.js)",
