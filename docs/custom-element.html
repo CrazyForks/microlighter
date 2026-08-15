@@ -51,7 +51,7 @@
       gap: 2rem;
       align-items: end;
       padding-block: clamp(3rem, 8vw, 6rem);
-      border-bottom: 2px solid color-mix(var(--syntax-string) 30%, transparent);
+      border-bottom: 2px solid var(--page-section-border);
     }
 
     .intro h2 {
@@ -68,12 +68,18 @@
       line-height: 1.7;
     }
 
+    p code {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--syntax-function);
+    }
+
     .component-example {
       display: grid;
       grid-template-columns: 8rem minmax(0, 1fr);
       gap: 1.5rem;
       padding-block: 2rem;
-      border-bottom: 1px solid var(--page-border);
+      border-bottom: 2px solid var(--page-section-border);
     }
 
     .example-label {
@@ -117,18 +123,9 @@
       text-transform: uppercase;
     }
 
-    .page-footer {
-      display: flex;
-      justify-content: space-between;
-      gap: 1rem;
-      padding-block: 2rem 4rem;
-      color: var(--page-muted);
-      font-size: 0.8rem;
-    }
-
-    .page-footer a {
+    .part-demo::part(line-numbers) {
+      font-family: fantasy;
       color: var(--syntax-function);
-      text-underline-offset: 0.25em;
     }
 
     @media (max-width: 52rem) {
@@ -147,10 +144,6 @@
         display: none;
       }
 
-      .page-footer {
-        align-items: flex-start;
-        flex-direction: column;
-      }
     }
   </style>
 </head>
@@ -204,27 +197,13 @@
 
   <main>
     <section class="intro" aria-labelledby="intro-title">
-      <h2 id="intro-title">Clean markup. Copy included.</h2>
+      <h2 id="intro-title">
+        +Copy button<br/>
+        +Line numbers
+      </h2>
       <p>Wrap a standard <code>&lt;pre&gt;&lt;code&gt;</code> block, choose a language, and opt into the controls you need.</p>
     </section>
 
-    <section class="component-example" aria-labelledby="live-label">
-      <div class="example-label">
-        <span>01 / Live</span>
-        <h2 id="live-label">Copy control</h2>
-      </div>
-      <div class="example-body">
-        <micro-lighter language="javascript" controls="copy">
-          <pre><code>const palette = ["keyword", "string", "function"];
-
-const paint = token =&gt; {
-  return `var(--syntax-${token})`;
-};
-
-palette.map(paint);</code></pre>
-        </micro-lighter>
-      </div>
-    </section>
 
     <section class="install" aria-labelledby="setup-label">
       <div class="install-label">
@@ -239,27 +218,47 @@ palette.map(paint);</code></pre>
   &lt;/head&gt;
 
   &lt;body&gt;
-    &lt;micro-lighter language="javascript" controls="copy"&gt;
-      &lt;pre&gt;&lt;code&gt;const answer = 42;&lt;/code&gt;&lt;/pre&gt;
+    &lt;micro-lighter language="javascript" controls="copy" line-numbers&gt;
+      &lt;pre&gt;&lt;code&gt;customElements.define("spicy-iframe", class extends HTMLElement {});&lt;/code&gt;&lt;/pre&gt;
     &lt;/micro-lighter&gt;
   &lt;/body&gt;
 &lt;/html&gt;</code></pre>
       </div>
     </section>
 
-    <section class="component-example" aria-labelledby="inference-label">
+    <section class="component-example" aria-labelledby="live-label">
       <div class="example-label">
-        <span>02 / Infer</span>
-        <h2 id="inference-label">Language metadata</h2>
+        <span>01 / Live</span>
+        <h2 id="live-label">Copy control</h2>
       </div>
       <div class="example-body">
-        <p>Leave off the element's <code>language</code> attribute to use metadata already present on the code block.</p>
-        <micro-lighter controls="copy">
-          <pre><code class="language-python">def greet(name: str) -&gt; str:
-    return f"Hello, {name}."
+        <p>Add <code>controls="copy"</code> to enable the copy button.</p>
+
+        <micro-lighter language="javascript" controls="copy">
+          <pre><code>class ReinventedButton extends HTMLElement {
+  connectedCallback() {
+    this.status = "platform-native, eventually";
+  }
+}
+
+customElements.define("reinvented-button", ReinventedButton);</code></pre>
+        </micro-lighter>
+      </div>
+    </section>
+
+    <section class="component-example" aria-labelledby="inference-label">
+      <div class="example-label">
+        <span>02 / Lines</span>
+        <h2 id="inference-label">Line numbers</h2>
+      </div>
+      <div class="example-body">
+        <p>Add the <code>line-numbers</code> attribute for a non-copyable gutter. This sample also infers Python from the code block's existing metadata.</p>
+        <micro-lighter controls="copy" line-numbers>
+          <pre><code class="language-python">def explain_shadow_dom() -&gt; str:
+    return "It is private, except for the five escape hatches."
 
 
-print(greet("web components"))</code></pre>
+print(explain_shadow_dom())</code></pre>
         </micro-lighter>
       </div>
     </section>
@@ -271,17 +270,23 @@ print(greet("web components"))</code></pre>
       </div>
       <div class="example-body">
         <p>The default button follows the syntax theme. Use its exposed part when the page needs a stronger treatment.</p>
-        <pre><code class="language-css">micro-lighter::part(copy-button) {
+        <pre><code class="language-css">/* Encapsulation, with a small customer-service window. */
+micro-lighter::part(copy-button) {
   background: var(--syntax-function);
   border-color: var(--syntax-function);
   color: var(--syntax-background);
   font-weight: 700;
   text-transform: uppercase;
-}</code></pre>
-        <micro-lighter class="part-demo" language="css" controls="copy">
-          <pre><code>.token {
+}
+
+micro-lighter::part(line-numbers) {
+  font-family: fantasy;
   color: var(--syntax-function);
-  font-weight: 700;
+}</code></pre>
+        <micro-lighter class="part-demo" language="css" controls="copy" line-numbers>
+          <pre><code>.web-component {
+  display: block; /* Groundbreaking. */
+  contain: content; /* Beyond expectations. */
 }</code></pre>
         </micro-lighter>
       </div>
@@ -289,8 +294,16 @@ print(greet("web components"))</code></pre>
   </main>
 
   <footer class="page-footer">
-    <span>MicroLighter custom element</span>
-    <a href="./">Explore every grammar</a>
+    <div class="footer-brand">
+      <strong>MicroLighter</strong>
+      <span>Syntax highlighting, minus the span collection.</span>
+    </div>
+    <nav class="footer-nav" aria-label="Footer">
+      <a href="./">Languages and themes</a>
+      <a href="https://github.com/davatron5000/microlighter#readme">Documentation</a>
+      <a href="https://github.com/davatron5000/microlighter">GitHub</a>
+      <a href="https://github.com/davatron5000/microlighter/issues">Issues</a>
+    </nav>
   </footer>
 
   <script>

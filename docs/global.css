@@ -7,6 +7,7 @@
   --page-fg: var(--syntax-foreground, light-dark(#1f1f1f, #ececec));
   --page-muted: light-dark(#646464, #a3a3a3);
   --page-border: light-dark(#d4d4d4, #383838);
+  --page-section-border: color-mix(var(--syntax-string) 40%, transparent);
 }
 
 body {
@@ -14,8 +15,8 @@ body {
   margin: 0;
   background-color: var(--page-bg);
   background-image:
-    linear-gradient(color-mix(in srgb, var(--page-border) 30%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in srgb, var(--page-border) 30%, transparent) 1px, transparent 1px);
+    linear-gradient(color-mix(in srgb, var(--syntax-comment) 12.5%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--syntax-comment) 12.5%, transparent) 1px, transparent 1px);
   background-size: 32px 32px;
   color: var(--page-fg);
   font-family: "Cascadia Mono", monospace;
@@ -40,7 +41,7 @@ header {
   justify-content: space-between;
   gap: 2rem;
   padding-block: clamp(3rem, 9vw, 7rem) 2rem;
-  border-bottom: 2px solid color-mix(var(--syntax-string) 30%, transparent);
+  border-bottom: 2px solid var(--page-section-border);
 }
 
 .github-link {
@@ -237,7 +238,7 @@ main {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   margin-block: 1rem;
-  border-block: 2px solid color-mix(var(--syntax-string) 30%, transparent);
+  border-block: 2px solid var(--page-section-border);
 }
 
 .feature {
@@ -248,7 +249,7 @@ main {
 }
 
 .feature + .feature {
-  border-inline-start: 2px solid color-mix(var(--syntax-string) 30%, transparent);
+  border-inline-start: 2px solid var(--page-section-border);
 }
 
 .feature-index {
@@ -356,7 +357,7 @@ main {
   grid-template-columns: 8rem minmax(0, 1fr);
   gap: 1.5rem;
   padding-block: 2rem;
-  border-bottom: 1px solid var(--page-border);
+  border-bottom: 2px solid var(--page-section-border);
 }
 
 .install-label {
@@ -392,7 +393,7 @@ main {
   display: grid;
   gap: 0.75rem;
   padding-block: 3rem 2rem;
-  border-bottom: 1px solid var(--page-border);
+  border-bottom: 2px solid var(--page-section-border);
 }
 
 .samples-heading h2 {
@@ -412,7 +413,7 @@ main {
   grid-template-columns: 8rem minmax(0, 1fr);
   gap: 1.5rem;
   padding-block: 2rem;
-  border-bottom: 1px solid var(--page-border);
+  border-bottom: 2px solid var(--page-section-border);
 }
 
 .sample-label {
@@ -424,7 +425,7 @@ main {
   display: grid;
   gap: 1.25rem;
   padding-block: 2rem;
-  border-bottom: 1px solid var(--page-border);
+  border-bottom: 2px solid var(--page-section-border);
 }
 
 .language-index > p {
@@ -499,8 +500,38 @@ pre {
   white-space: pre;
 }
 
-footer {
-  padding-bottom: 3rem;
+.page-footer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 2rem;
+  padding-block: 2rem 4rem;
+  border-top: 2px solid var(--page-section-border);
+  color: var(--page-muted);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.footer-brand {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.footer-brand strong {
+  color: var(--page-fg);
+  font-size: 0.9rem;
+}
+
+.footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 0.75rem 1.25rem;
+}
+
+.page-footer a {
+  color: var(--syntax-function);
+  text-underline-offset: 0.25em;
 }
 
 @media (max-width: 52rem) {
@@ -527,7 +558,7 @@ footer {
   }
 
   .feature:nth-child(n + 3) {
-    border-block-start: 2px solid var(--syntax-keyword);
+    border-block-start: 2px solid var(--page-section-border);
   }
 
   .install,
@@ -547,12 +578,21 @@ footer {
 }
 
 @media (max-width: 30rem) {
+  .page-footer {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .footer-nav {
+    justify-content: start;
+  }
+
   .features {
     grid-template-columns: 1fr;
   }
 
   .feature + .feature {
-    border-block-start: 2px solid var(--syntax-keyword);
+    border-block-start: 2px solid var(--page-section-border);
     border-inline-start: 0;
   }
 

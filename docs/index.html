@@ -127,6 +127,11 @@ await highlightAll();</code></pre>
         <pre><code class="language-html">&lt;pre&gt;&lt;code class="language-javascript"&gt;const answer = 42;&lt;/code&gt;&lt;/pre&gt;</code></pre>
         <p>Prefer automatic setup? Import the minified auto-runner instead. It highlights the page immediately and re-highlights when a <code>syntax-highlight</code> event is dispatched.</p>
         <pre><code class="language-javascript">import "microlighter/microlighter.min.js";</code></pre>
+        <p>Want copy controls or line numbers? Import the custom element bundle and wrap the same standard <code>&lt;pre&gt;&lt;code&gt;</code> markup.</p>
+        <pre><code class="language-javascript">import "microlighter/micro-lighter-element.min.js";</code></pre>
+        <pre><code class="language-html">&lt;micro-lighter language="javascript" controls="copy" line-numbers&gt;
+  &lt;pre&gt;&lt;code&gt;const answer = 42;&lt;/code&gt;&lt;/pre&gt;
+&lt;/micro-lighter&gt;</code></pre>
         <a href="./custom-element.html">Try the custom element demo</a>
         <a href="https://github.com/davatron5000/microlighter#readme">Read more in the docs</a>
       </div>
@@ -620,7 +625,18 @@ jobs:
 
   </main>
 
-  <footer aria-hidden="true"></footer>
+  <footer class="page-footer">
+    <div class="footer-brand">
+      <strong>MicroLighter</strong>
+      <span>Syntax highlighting, minus the span collection.</span>
+    </div>
+    <nav class="footer-nav" aria-label="Footer">
+      <a href="./custom-element.html">Custom element</a>
+      <a href="https://github.com/davatron5000/microlighter#readme">Documentation</a>
+      <a href="https://github.com/davatron5000/microlighter">GitHub</a>
+      <a href="https://github.com/davatron5000/microlighter/issues">Issues</a>
+    </nav>
+  </footer>
 
   <dialog id="theme-code-dialog" aria-labelledby="theme-code-title">
     <div class="dialog-bar">

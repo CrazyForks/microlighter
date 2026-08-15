@@ -49,7 +49,7 @@ token markup:
 <link rel="stylesheet" href="./node_modules/microlighter/themes/github.css">
 <script type="module" src="./node_modules/microlighter/micro-lighter-element.min.js"></script>
 
-<micro-lighter language="javascript" controls="copy">
+<micro-lighter language="javascript" controls="copy" line-numbers>
   <pre><code>const answer = 42;</code></pre>
 </micro-lighter>
 ```
@@ -58,7 +58,8 @@ The element's `language` attribute takes precedence when present. Without it,
 the component uses the standard `language-*` class or `data-language` metadata
 on the nested `<code>` or `<pre>`. `controls` accepts comma- or space-separated
 control names. The `copy` control adds a copy button. Style it with
-`micro-lighter::part(copy-button)`.
+`micro-lighter::part(copy-button)`. Add the boolean `line-numbers` attribute to
+show a gutter that stays out of copied code.
 
 ### 1. Auto (drop-in)
 
