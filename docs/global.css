@@ -8,6 +8,8 @@
   --page-muted: light-dark(#646464, #a3a3a3);
   --page-border: light-dark(#d4d4d4, #383838);
   --page-section-border: color-mix(var(--syntax-string) 40%, transparent);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
