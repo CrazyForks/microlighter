@@ -112,10 +112,15 @@ const printTable = (title, rows, columns) => {
 
 const bundle = "dist/microlighter.min.js";
 const bundleSizes = getSizes(bundle);
+const customElement = 'dist/micro-lighter-element.min.js';
+const customElementSizes = getSizes(customElement);
 
 printTable(
-  "Bundle (microlighter.min.js)",
-  [[bundle, kib(bundleSizes.raw), kib(bundleSizes.gzip), kib(bundleSizes.brotli)]],
+  "Bundles",
+  [
+    [bundle, kib(bundleSizes.raw), kib(bundleSizes.gzip), kib(bundleSizes.brotli)],
+    [customElement, kib(customElementSizes.raw), kib(customElementSizes.gzip), kib(customElementSizes.brotli)]
+  ],
   ["file", "raw", "gzip", "brotli"]
 );
 
@@ -131,14 +136,13 @@ const themeChunks = listing("dist/themes").map(analyzeChunk);
 const chunkRows = [...grammarChunks, ...themeChunks].map(chunk => [
   relative("dist", chunk.path),
   kib(chunk.raw),
-  kib(chunk.min),
   kib(chunk.gzip)
 ]);
 
 printTable(
-  "Lazy-loaded chunks (fetched on demand)",
+  "Lazy-loaded chunks (fetched on demand)\n",
   chunkRows,
-  ["file", "raw", "min", "gzip"]
+  ["file", "raw (min)", "gzip"]
 );
 
 const average = (chunks, field) =>
@@ -148,14 +152,13 @@ const averageRow = (label, chunks) => [
   label,
   String(chunks.length),
   kib(average(chunks, "raw")),
-  kib(average(chunks, "min")),
   kib(average(chunks, "gzip"))
 ];
 
 printTable(
-  "Average chunk size (minified)",
+  "Average chunk size\n",
   [averageRow("grammars", grammarChunks), averageRow("themes", themeChunks)],
-  ["category", "files", "raw", "min", "gzip"]
+  ["category", "files", "raw (min)", "gzip"]
 );
 
 // Keep the homepage's headline gzip figure in sync with the real bundle.
