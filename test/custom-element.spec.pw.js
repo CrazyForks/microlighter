@@ -175,8 +175,8 @@ const secondLine = false;</code></pre>
       paddingTopMatches: true
     });
 
-    await page.locator("#inferred code").evaluate(code => {
-      code.append("\nconst thirdLine = null;");
+    await page.locator("#inferred code").evaluate(codeBlock => {
+      codeBlock.append("\nconst thirdLine = null;");
     });
     await expect.poll(() => page.locator("#inferred").evaluate(element => {
       return element.shadowRoot.querySelector(".line-numbers").textContent;

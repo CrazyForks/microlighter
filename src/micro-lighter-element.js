@@ -1,4 +1,4 @@
-import { highlightAll } from "./highlight-all.js";
+import { highlightAll } from "./highlight.js";
 
 const template = document.createElement("template");
 template.innerHTML = `
@@ -92,7 +92,7 @@ export class MicroLighter extends HTMLElement {
   static observedAttributes = ["controls", "language", "line-numbers"];
 
   #button;
-  #code;
+  #codeBlock;
   #languageOverridden = false;
   #lineNumbers;
   #onResize;
@@ -139,9 +139,9 @@ export class MicroLighter extends HTMLElement {
   }
 
   async #copy() {
-    if (!this.#code) return;
+    if (!this.#codeBlock) return;
 
-    await navigator.clipboard.writeText(this.#code.textContent);
+    await navigator.clipboard.writeText(this.#codeBlock.textContent);
     this.#button.textContent = "Copied";
     this.#button.ariaNotify?.("Copied to clipboard");
 
@@ -152,12 +152,12 @@ export class MicroLighter extends HTMLElement {
   }
 
   #update() {
-    const code = this.querySelector(":scope > pre > code");
-    const pre = code?.parentElement;
+    const codeBlock = this.querySelector(":scope > pre > code");
+    const pre = codeBlock?.parentElement;
 
-    if (this.#code !== code) {
+    if (this.#codeBlock !== codeBlock) {
       this.#restoreLanguage();
-      this.#code = code;
+      this.#codeBlock = codeBlock;
     }
 
     if (this.#pre !== pre) {
@@ -166,32 +166,32 @@ export class MicroLighter extends HTMLElement {
       if (pre) this.#resizeObserver.observe(pre);
     }
 
-    this.#button.hidden = !this.#hasControl("copy") || !code;
+    this.#button.hidden = !this.#hasControl("copy") || !codeBlock;
 
     const language = this.getAttribute("language");
-    if (code && language) {
+    if (codeBlock && language) {
       if (!this.#languageOverridden) {
-        this.#originalLanguage = code.getAttribute("data-language");
+        this.#originalLanguage = codeBlock.getAttribute("data-language");
         this.#languageOverridden = true;
       }
-      if (code.dataset.language !== language) code.dataset.language = language;
+      if (codeBlock.dataset.language !== language) codeBlock.dataset.language = language;
     } else {
       this.#restoreLanguage();
     }
 
     this.#updateLineNumbers();
 
-    if (code) highlightAll();
+    if (codeBlock) highlightAll();
   }
 
   #updateLineNumbers() {
-    if (!this.#code || !this.hasAttribute("line-numbers")) {
+    if (!this.#codeBlock || !this.hasAttribute("line-numbers")) {
       this.#lineNumbers.hidden = true;
       this.#lineNumbers.textContent = "";
       return;
     }
 
-    const lineCount = this.#code.textContent.split(/\r\n?|\n/).length;
+    const lineCount = this.#codeBlock.textContent.split(/\r\n?|\n/).length;
     this.#alignLineNumbers();
     this.#lineNumbers.textContent = Array.from(
       { length: lineCount },
@@ -214,15 +214,15 @@ export class MicroLighter extends HTMLElement {
   }
 
   #restoreLanguage() {
-    if (!this.#code || !this.#languageOverridden) return;
+    if (!this.#codeBlock || !this.#languageOverridden) return;
 
-    if (this.#originalLanguage === null && this.#code.hasAttribute("data-language")) {
-      delete this.#code.dataset.language;
+    if (this.#originalLanguage === null && this.#codeBlock.hasAttribute("data-language")) {
+      delete this.#codeBlock.dataset.language;
     } else if (
       this.#originalLanguage !== null
-      && this.#code.getAttribute("data-language") !== this.#originalLanguage
+      && this.#codeBlock.getAttribute("data-language") !== this.#originalLanguage
     ) {
-      this.#code.setAttribute("data-language", this.#originalLanguage);
+      this.#codeBlock.setAttribute("data-language", this.#originalLanguage);
     }
     this.#languageOverridden = false;
   }

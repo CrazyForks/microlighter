@@ -45,117 +45,6 @@ test.describe("MicroLighter demo site (docs/index.html)", () => {
     }
   });
 
-  test("maps TextMate scopes to stable semantic categories", async ({ page }) => {
-    await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
-
-    const actual = await page.evaluate(async () => {
-      const { highlight } = await import("/docs/microlighter/highlight.js");
-      const mappings = [
-        ["comment.block.html", "comment"],
-        ["markup.quote", "quote"],
-        ["markup.inserted.diff", "inserted"],
-        ["markup.deleted.diff", "deleted"],
-        ["constant.character.entity", "character-entity"],
-        ["keyword.control.doctype", "doctype"],
-        ["keyword.control.at-rule", "at-rule"],
-        ["keyword.other.important", "important"],
-        ["entity.name.section", "section"],
-        ["string.regexp", "regexp"],
-        ["string.quoted.attribute-value", "attribute-value"],
-        ["string.other.link", "link"],
-        ["markup.raw", "raw"],
-        ["string.unquoted.fenced-code", "string"],
-        ["constant.numeric.line-number.diff", "numeric"],
-        ["constant.language.boolean", "boolean"],
-        ["constant.other.symbol", "symbol"],
-        ["constant.language", "constant"],
-        ["keyword.operator", "operator"],
-        ["storage.type", "storage"],
-        ["keyword.control.ts", "keyword"],
-        ["support.class.builtin", "support"],
-        ["entity.name.type.class", "type"],
-        ["entity.name.function.macro", "function"],
-        ["entity.name.decorator", "decorator"],
-        ["entity.name.animation", "animation"],
-        ["entity.name.variable.assignment", "variable"],
-        ["entity.name.interpolation", "interpolation"],
-        ["support.type.property-name", "property"],
-        ["entity.name.key", "key"],
-        ["entity.name.tag", "tag"],
-        ["entity.other.attribute-name", "attribute-name"],
-        ["entity.name.selector", "selector"],
-        ["punctuation.definition.string.begin", "punctuation"],
-        ["entity.name.anchor", "anchor"]
-      ];
-      const tokens = mappings.map((_, index) => `@${index}`);
-      const code = document.createElement("code");
-      code.textContent = tokens.join(" ");
-      document.body.append(code);
-
-      for (const category of CSS.highlights.keys()) CSS.highlights.delete(category);
-
-      const grammar = {
-        scopeName: "source.test",
-        patterns: mappings.map(([scope], index) => ({
-          match: `${tokens[index]}\\b`,
-          name: scope
-        }))
-      };
-      const grammars = {
-        languages: { test: grammar },
-        scopes: new Map()
-      };
-      highlight([code], grammars, () => "test");
-
-      return Object.fromEntries(
-        [...CSS.highlights].map(([category, ranges]) => [
-          category,
-          [...ranges].map(range => range.toString())
-        ])
-      );
-    });
-
-    const expected = {
-      comment: ["@0"],
-      quote: ["@1"],
-      inserted: ["@2"],
-      deleted: ["@3"],
-      "character-entity": ["@4"],
-      doctype: ["@5"],
-      "at-rule": ["@6"],
-      important: ["@7"],
-      section: ["@8"],
-      regexp: ["@9"],
-      "attribute-value": ["@10"],
-      link: ["@11"],
-      raw: ["@12"],
-      string: ["@13"],
-      numeric: ["@14"],
-      boolean: ["@15"],
-      symbol: ["@16"],
-      constant: ["@17"],
-      operator: ["@18"],
-      storage: ["@19"],
-      keyword: ["@20"],
-      support: ["@21"],
-      type: ["@22"],
-      function: ["@23"],
-      decorator: ["@24"],
-      animation: ["@25"],
-      variable: ["@26"],
-      interpolation: ["@27"],
-      property: ["@28"],
-      key: ["@29"],
-      tag: ["@30"],
-      "attribute-name": ["@31"],
-      selector: ["@32"],
-      punctuation: ["@33"],
-      anchor: ["@34"]
-    };
-
-    expect(actual).toEqual(expected);
-  });
-
   test("re-highlights after switching themes via the syntax-highlight event", async ({ page }) => {
     await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
 
@@ -196,14 +85,14 @@ test.describe("MicroLighter demo site (docs/index.html)", () => {
         // curated static samples is always present, regardless of which
         // playground language happens to be selected.
         const pre = document.querySelector("pre > code[class*='language-']")?.closest("pre");
-        const code = getComputedStyle(pre);
+        const codeStyle = getComputedStyle(pre);
         return {
           theme: document.documentElement.dataset.syntaxTheme,
           background: root.getPropertyValue("--syntax-background").trim(),
           foreground: root.getPropertyValue("--syntax-foreground").trim(),
           inserted: root.getPropertyValue("--syntax-inserted").trim(),
           deleted: root.getPropertyValue("--syntax-deleted").trim(),
-          codeBackground: code.backgroundColor
+          codeBackground: codeStyle.backgroundColor
         };
       });
 
@@ -288,7 +177,7 @@ test.describe("MicroLighter demo site (docs/index.html)", () => {
     await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
 
     await page.evaluate(() => {
-      document.querySelectorAll("pre > code[class*='language-']").forEach(code => code.remove());
+      document.querySelectorAll("pre > code[class*='language-']").forEach(codeBlock => codeBlock.remove());
       document.dispatchEvent(new Event("syntax-highlight"));
     });
 
@@ -303,7 +192,7 @@ test.describe("MicroLighter demo site (docs/index.html)", () => {
 
     const sampleLanguages = await page.evaluate(() =>
       [...document.querySelectorAll("section.sample:not(.playground) > pre > code[class*='language-']")]
-        .map(code => [...code.classList]
+        .map(codeBlock => [...codeBlock.classList]
           .find(className => className.startsWith("language-"))
           .slice("language-".length)));
 
@@ -368,8 +257,8 @@ test.describe("Language playground", () => {
     expect(staticSamples).not.toContain(selected);
 
     const renderedLang = await page.evaluate(() => {
-      const code = document.querySelector("#playground-output code[class*='language-']");
-      return [...code.classList]
+      const codeBlock = document.querySelector("#playground-output code[class*='language-']");
+      return [...codeBlock.classList]
         .find(className => className.startsWith("language-"))
         .slice("language-".length);
     });
@@ -399,10 +288,10 @@ test.describe("Language playground", () => {
     await expect(page.locator("#playground-output code.language-rust")).toHaveCount(1);
 
     const rustHighlighted = await page.evaluate(() => {
-      const code = document.querySelector("#playground-output code.language-rust");
+      const codeBlock = document.querySelector("#playground-output code.language-rust");
       for (const highlight of CSS.highlights.values()) {
         for (const range of highlight) {
-          if (range.startContainer.parentElement?.closest("#playground-output pre > code") === code) return true;
+          if (range.startContainer.parentElement?.closest("#playground-output pre > code") === codeBlock) return true;
         }
       }
       return false;

@@ -1,3 +1,23 @@
+import { createGrammarLoader, normalizeLanguage } from "./grammar-dependencies.js";
+
+const getLanguageClass = element => [...element.classList]
+  .find(className => className.startsWith("language-"))
+  ?.slice("language-".length);
+
+const getLanguage = codeBlock => {
+  const pre = codeBlock.parentElement;
+  const language = getLanguageClass(codeBlock)
+    || codeBlock.dataset.language
+    || getLanguageClass(pre)
+    || pre.dataset.language
+    // Deprecated: `lang` describes human language, not programming language.
+    || pre.getAttribute("lang")
+    || "";
+
+  return language.toLowerCase();
+};
+const loadGrammars = createGrammarLoader();
+
 /**
  * Highlight sets retained between scans so stale registered ranges can be
  * removed before replacements are created.
@@ -6,99 +26,120 @@
 const highlights = new Map();
 
 /**
- * Convert TextMate grammar matches into CSS Custom Highlight ranges.
- * @param {HTMLElement[]} blocks Code elements containing one text node each.
- * @param {{languages: Object<string, Object>, scopes: Map<string, Object>}} grammars
- * Loaded grammar indexes.
- * @param {(code: HTMLElement) => string} getLanguage Canonical language lookup.
+ * Flatten a TextMate scope to a stable semantic CSS highlight category.
+ * @param {string} scope
+ * @returns {string | undefined}
+ */
+const getCategory = scope => {
+  const parts = scope.split(".");
+  const [first, second, third] = parts;
+  const last = parts.at(-1);
+
+  if (first === "markup" && ["quote", "inserted", "deleted", "raw"].includes(second)) return second;
+  if (first === "entity" && second === "name") return third;
+  if (scope.startsWith("constant.character.entity")) return "character-entity";
+  if (parts.includes("numeric")) return "numeric";
+  if (scope.startsWith("support.type.property-name")) return "property";
+  if (parts.includes("attribute-value")) return "attribute-value";
+  if (scope.startsWith("string.other.link")) return "link";
+
+  if ([
+    "doctype", "at-rule", "important", "regexp", "boolean",
+    "symbol", "operator", "attribute-name"
+  ].includes(last)) return last;
+
+  if ([
+    "comment", "string", "constant", "storage", "keyword",
+    "variable", "punctuation", "entity", "support"
+  ].includes(first)) return first;
+};
+
+/**
+ * Register a matched text span under its CSS highlight category.
+ * @param {Text} node
+ * @param {number} start
+ * @param {number} end
+ * @param {string} scope
  * @returns {void}
  */
-export const highlight = (blocks, grammars, getLanguage) => {
+const addRange = (node, start, end, scope) => {
+  const category = getCategory(scope);
+  if (!category || start === end) return;
+
+  const range = new Range();
+  range.setStart(node, start);
+  range.setEnd(node, end);
+
+  if (!highlights.has(category)) highlights.set(category, new Highlight());
+  highlights.get(category).add(range);
+};
+
+/**
+ * Add named capture-group spans from a TextMate rule match.
+ * @param {Text} node
+ * @param {RegExpExecArray} match
+ * @param {Object<string, {name: string}>} [captures]
+ * @returns {void}
+ */
+const addCaptures = (node, match, captures = {}) => {
+  Object.entries(captures).forEach(([index, capture]) => {
+    const offsets = match.indices[index];
+    if (offsets) addRange(node, ...offsets, capture.name);
+  });
+};
+
+/**
+ * Escape text before inserting it into a regular expression.
+ * @param {string} value
+ * @returns {string}
+ */
+const escapeRegex = value => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/**
+ * Replace TextMate end-pattern backreferences with escaped begin captures.
+ * @param {string} pattern
+ * @param {RegExpExecArray} beginMatch
+ * @returns {string}
+ */
+const expandEnd = (pattern, beginMatch) => pattern.replace(/\\(\d+)/g, (reference, index) => {
+  return beginMatch[index] === undefined ? reference : escapeRegex(beginMatch[index]);
+});
+
+/**
+ * Normalize a grammar rule or repository entry to a rule array.
+ * @param {*} rule
+ * @returns {Object[]}
+ */
+const getRules = rule => {
+  if (!rule) return [];
+  if (Array.isArray(rule)) return rule;
+  if (rule.match || rule.begin || rule.include) return [rule];
+  return rule.patterns || [];
+};
+
+/**
+ * Find code blocks, load their TextMate grammars, and register CSS highlights.
+ * @param {Object} [options]
+ * @param {ParentNode} [options.root=document]
+ * @param {string} [options.selector="pre > code"]
+ * @param {Object<string, string>} [options.languageAliases]
+ * @returns {Promise<HTMLElement[]>}
+ */
+export const highlightAll = async ({
+  root = document,
+  selector = "pre > code",
+  languageAliases
+} = {}) => {
+  const codeBlocks = [...root.querySelectorAll(selector)].filter(getLanguage);
+  const languages = codeBlocks.map(codeBlock =>
+    normalizeLanguage(getLanguage(codeBlock), languageAliases)
+  );
+  const grammars = await loadGrammars(languages);
   const regexes = new Map();
 
   highlights.forEach((ranges, category) => {
     if (CSS.highlights.get(category) === ranges) CSS.highlights.delete(category);
     ranges.clear();
-  });
-
-  /**
-   * Flatten a TextMate scope to a stable semantic CSS highlight category.
-   * @param {string} scope
-   * @returns {string | undefined}
-   */
-  const getCategory = scope => {
-    const parts = scope.split(".");
-    const [first, second, third] = parts;
-    const last = parts.at(-1);
-
-    if (first === "markup" && ["quote", "inserted", "deleted", "raw"].includes(second)) return second;
-    if (first === "entity" && second === "name") return third;
-    if (scope.startsWith("constant.character.entity")) return "character-entity";
-    if (parts.includes("numeric")) return "numeric";
-    if (scope.startsWith("support.type.property-name")) return "property";
-    if (parts.includes("attribute-value")) return "attribute-value";
-    if (scope.startsWith("string.other.link")) return "link";
-
-    if ([
-      "doctype", "at-rule", "important", "regexp", "boolean",
-      "symbol", "operator", "attribute-name"
-    ].includes(last)) return last;
-
-    if ([
-      "comment", "string", "constant", "storage", "keyword",
-      "variable", "punctuation", "entity", "support"
-    ].includes(first)) return first;
-  };
-
-  /**
-   * Register a matched text span under its CSS highlight category.
-   * @param {Text} node
-   * @param {number} start
-   * @param {number} end
-   * @param {string} scope
-   * @returns {void}
-   */
-  const addRange = (node, start, end, scope) => {
-    const category = getCategory(scope);
-    if (!category || start === end) return;
-
-    const range = new Range();
-    range.setStart(node, start);
-    range.setEnd(node, end);
-
-    if (!highlights.has(category)) highlights.set(category, new Highlight());
-    highlights.get(category).add(range);
-  };
-
-  /**
-   * Add named capture-group spans from a TextMate rule match.
-   * @param {Text} node
-   * @param {RegExpExecArray} match
-   * @param {Object<string, {name: string}>} [captures]
-   * @returns {void}
-   */
-  const addCaptures = (node, match, captures = {}) => {
-    Object.entries(captures).forEach(([index, capture]) => {
-      const offsets = match.indices[index];
-      if (offsets) addRange(node, ...offsets, capture.name);
-    });
-  };
-
-  /**
-   * Escape text before inserting it into a regular expression.
-   * @param {string} value
-   * @returns {string}
-   */
-  const escapeRegex = value => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-  /**
-   * Replace TextMate end-pattern backreferences with escaped begin captures.
-   * @param {string} pattern
-   * @param {RegExpExecArray} beginMatch
-   * @returns {string}
-   */
-  const expandEnd = (pattern, beginMatch) => pattern.replace(/\\(\d+)/g, (reference, index) => {
-    return beginMatch[index] === undefined ? reference : escapeRegex(beginMatch[index]);
   });
 
   /**
@@ -118,18 +159,6 @@ export const highlight = (blocks, grammars, getLanguage) => {
   };
 
   /**
-   * Normalize a grammar rule or repository entry to a rule array.
-   * @param {*} rule
-   * @returns {Object[]}
-   */
-  const getRules = rule => {
-    if (!rule) return [];
-    if (Array.isArray(rule)) return rule;
-    if (rule.match || rule.begin || rule.include) return [rule];
-    return rule.patterns || [];
-  };
-
-  /**
    * Resolve local, base, and external TextMate include references.
    * @param {string} include
    * @param {Object} grammar
@@ -140,7 +169,7 @@ export const highlight = (blocks, grammars, getLanguage) => {
     if (include === "$self") return { grammar, rules: grammar.patterns };
     if (include === "$base") return { grammar: baseGrammar, rules: baseGrammar.patterns };
 
-    if (include.startsWith("#")) {
+    if (include[0] === "#") {
       return { grammar, rules: getRules(grammar.repository?.[include.slice(1)]) };
     }
 
@@ -267,10 +296,10 @@ export const highlight = (blocks, grammars, getLanguage) => {
     return { contentEnd: end, end, match: null };
   };
 
-  blocks.forEach(code => {
-    const grammar = grammars.languages[getLanguage(code)];
-    const node = code.firstChild;
-    if (!grammar || code.childNodes.length !== 1 || node.nodeType !== Node.TEXT_NODE) return;
+  codeBlocks.forEach((codeBlock, index) => {
+    const grammar = grammars.languages[languages[index]];
+    const node = codeBlock.firstChild;
+    if (!grammar || codeBlock.childNodes.length !== 1 || node.nodeType !== Node.TEXT_NODE) return;
 
     scanRegion(node, grammar.patterns, 0, node.data.length, grammar);
   });
@@ -278,4 +307,6 @@ export const highlight = (blocks, grammars, getLanguage) => {
   highlights.forEach((ranges, category) => {
     if (ranges.size) CSS.highlights.set(category, ranges);
   });
+
+  return codeBlocks;
 };

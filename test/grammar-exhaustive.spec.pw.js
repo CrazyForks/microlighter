@@ -16,17 +16,17 @@ const readBlockCoverage = page =>
     const highlightedCodes = new Set();
     for (const highlight of CSS.highlights.values()) {
       for (const range of highlight) {
-        const code = range.startContainer.parentElement?.closest("pre > code[class*='language-']");
-        if (code) highlightedCodes.add(code);
+        const codeBlock = range.startContainer.parentElement?.closest("pre > code[class*='language-']");
+        if (codeBlock) highlightedCodes.add(codeBlock);
       }
     }
 
-    return [...document.querySelectorAll("pre > code[class*='language-']")].map(code => ({
-      lang: [...code.classList]
+    return [...document.querySelectorAll("pre > code[class*='language-']")].map(codeBlock => ({
+      lang: [...codeBlock.classList]
         .find(className => className.startsWith("language-"))
         .slice("language-".length),
-      nonEmpty: code.textContent.trim().length > 0,
-      highlighted: highlightedCodes.has(code)
+      nonEmpty: codeBlock.textContent.trim().length > 0,
+      highlighted: highlightedCodes.has(codeBlock)
     }));
   });
 
