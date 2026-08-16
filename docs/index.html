@@ -5,6 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>MicroLighter - A zero-dep syntax highlighter</title>
   <script>
+    function setSyntaxTheme(theme) {
+      const themeLinks = [...document.querySelectorAll("link[data-syntax-theme]")];
+      const selectedTheme = themeLinks.some(link => link.dataset.syntaxTheme === theme) ? theme : "github";
+
+      document.documentElement.dataset.syntaxTheme = selectedTheme;
+      themeLinks.forEach(link => {
+        const isSelected = link.dataset.syntaxTheme === selectedTheme;
+        link.disabled = !isSelected;
+
+        if (isSelected) {
+          link.href = link.dataset.href;
+        } else {
+          link.removeAttribute("href");
+        }
+      });
+      return selectedTheme;
+    }
+
     try {
       const storedTheme = localStorage.getItem("syntax-theme");
       const renamedThemes = { "dark-plus": "vscode-plus", "github-light": "github" };
@@ -16,7 +34,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cascadia+Mono:wght@300;500;700&amp;display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./microlighter/themes/index.css">
+  <link rel="stylesheet" data-href="./microlighter/themes/github.css" data-syntax-theme="github" disabled>
+  <link rel="stylesheet" data-href="./microlighter/themes/vscode-plus.css" data-syntax-theme="vscode-plus" disabled>
+  <link rel="stylesheet" data-href="./microlighter/themes/dracula.css" data-syntax-theme="dracula" disabled>
+  <link rel="stylesheet" data-href="./microlighter/themes/monokai.css" data-syntax-theme="monokai" disabled>
+  <link rel="stylesheet" data-href="./microlighter/themes/night-owl.css" data-syntax-theme="night-owl" disabled>
+  <link rel="stylesheet" data-href="./microlighter/themes/solarized-light.css" data-syntax-theme="solarized-light" disabled>
+  <link rel="stylesheet" data-href="./microlighter/themes/vesper.css" data-syntax-theme="vesper" disabled>
+  <link rel="stylesheet" data-href="./microlighter/themes/min.css" data-syntax-theme="min" disabled>
+  <link rel="stylesheet" data-href="./microlighter/themes/cobalt2.css" data-syntax-theme="cobalt2" disabled>
+  <link rel="stylesheet" data-href="./microlighter/themes/tokyo-night.css" data-syntax-theme="tokyo-night" disabled>
+  <script>setSyntaxTheme(document.documentElement.dataset.syntaxTheme);</script>
   <link rel="stylesheet" href="./global.css">
 </head>
 <body>
@@ -665,20 +693,27 @@ jobs:
       colorSchemeToggle.title = nextLabel;
     };
 
+    const formatThemeCode = css => css
+      .replace(/[ \t]*{/g, " {\n\t")
+      .replace(/;[ \t]*/g, ";\n\t")
+      .replace(/light-dark\([^)]*\)|,[ \t]*/g, match => match.startsWith(",") ? ",\n" : match)
+      .replace(/[ \t]*}/g, "\n}\n\n")
+      .replaceAll("\n\t\n}", "\n}")
+      .trim();
+
     const selectedThemeCode = async () => {
       const response = await fetch(`./microlighter/themes/${themeSelect.value}.css`);
 
       if (!response.ok) throw new Error("Unable to load theme CSS");
 
-      return response.text();
+      return formatThemeCode(await response.text());
     };
 
-    themeSelect.value = themes.includes(currentTheme) ? currentTheme : "github";
-    document.documentElement.dataset.syntaxTheme = themeSelect.value;
+    themeSelect.value = setSyntaxTheme(themes.includes(currentTheme) ? currentTheme : "github");
     setColorScheme(document.documentElement.dataset.colorScheme);
 
     themeSelect.addEventListener("change", event => {
-      document.documentElement.dataset.syntaxTheme = event.target.value;
+      setSyntaxTheme(event.target.value);
       try {
         localStorage.setItem("syntax-theme", event.target.value);
       } catch {}

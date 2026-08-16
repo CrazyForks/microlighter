@@ -14,6 +14,16 @@ rm -rf "$dist"
 mkdir -p "$dist"
 cp -R "$directory/src/." "$dist/"
 
+npx --yes esbuild@0.25.8 "$directory/src/grammars/"*.js \
+  --minify-whitespace \
+  --outdir="$dist/grammars" \
+  --log-level=warning
+
+npx --yes esbuild@0.25.8 "$directory/src/themes/"*.css \
+  --minify-whitespace \
+  --outdir="$dist/themes" \
+  --log-level=warning
+
 npx --yes rollup@4.46.2 "$directory/src/microlighter.js" \
   --format esm \
   --file "$bundle" \

@@ -34,3 +34,15 @@ test("build emits complete custom-element bundles", async () => {
   assert.match(minifiedBundle, /customElements\.define\(["']micro-lighter["']/);
   assert.ok(bundle.length > minifiedBundle.length);
 });
+
+test("build whitespace-minifies grammar and theme files", async () => {
+  const [grammar, theme] = await Promise.all([
+    readFile(new URL("../dist/grammars/javascript.js", import.meta.url), "utf8"),
+    readFile(new URL("../dist/themes/github.css", import.meta.url), "utf8")
+  ]);
+
+  assert.equal(grammar.trim().split("\n").length, 1);
+  assert.match(grammar, /export default\{scopeName:"source\.js"/);
+  assert.equal(theme.trim().split("\n").length, 1);
+  assert.match(theme, /\[data-syntax-theme=(?:"github"|github)\]/);
+});
