@@ -298,8 +298,11 @@ export const highlightAll = async ({
 
   codeBlocks.forEach((codeBlock, index) => {
     const grammar = grammars.languages[languages[index]];
+    if (!grammar) return;
+
+    codeBlock.normalize();
     const node = codeBlock.firstChild;
-    if (!grammar || codeBlock.childNodes.length !== 1 || node.nodeType !== Node.TEXT_NODE) return;
+    if (node?.nodeType !== Node.TEXT_NODE || node.nextSibling) return;
 
     scanRegion(node, grammar.patterns, 0, node.data.length, grammar);
   });

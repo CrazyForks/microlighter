@@ -3,31 +3,67 @@
 [![CI](https://github.com/davatron5000/microlighter/actions/workflows/ci.yml/badge.svg)](https://github.com/davatron5000/microlighter/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
-A tiny, dependency-free syntax highlighter for the web. MicroLighter uses the
-[CSS Custom Highlight API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API)
-and TextMate grammars to colorize code **without** wrapping every token in a
-`<span>`. Your markup stays clean; the highlighting lives entirely in the
-highlight registry and CSS.
+A tiny, dependency-free syntax highlighter for the web.
 
-## Usage
+MicroLighter uses the [CSS Custom Highlight API][highlight-api] and TextMate
+grammars. It highlights code without adding a `<span>` around every token, so
+your markup stays clean and editable.
 
-MicroLighter ships in three flavors so you can pick the right trade-off between
-convenience and control. Use the HTML-standard `language-*` class on `<code>`:
+## Features
+
+- About 2 KiB compressed
+- No runtime dependencies
+- 35 languages, loaded on demand
+- 10 bundled themes
+- Clean DOM with no token markup
+- Programmatic, automatic, and web component APIs
+- Editable code block support
+
+## Install
+
+```sh
+npm install microlighter
+```
+
+## Quick start
+
+Add a language class to your code:
 
 ```html
 <pre><code class="language-javascript">const answer = 42;</code></pre>
 ```
 
-MicroLighter also accepts `data-language="javascript"` on either `<code>` or
-its parent `<pre>`. The older `<pre lang="javascript">` form remains supported
-for compatibility but is deprecated because HTML's `lang` attribute describes
-human language.
+Import a theme and run the highlighter:
 
-Common aliases work automatically in both the import API and auto-run bundles.
-Project-specific names can be supplied through the import API:
+```js
+import "microlighter/themes/github.css";
+import { highlightAll } from "microlighter";
+
+document.body.dataset.syntaxTheme = "github";
+await highlightAll();
+```
+
+That's it. MicroLighter finds every `pre > code` block with a supported
+language and highlights it.
+
+## Usage
+
+### Programmatic API
+
+The main package exports `highlightAll()`. Importing it has no side effects.
+
+```js
+import { highlightAll } from "microlighter";
+
+await highlightAll();
+```
+
+Pass options to limit the scan or add project-specific language aliases:
 
 ```js
 await highlightAll({
+  root: document.querySelector("#docs"),
+  selector: "pre.code > code",
   languageAliases: {
     ecmascript: "javascript",
     shellsession: "bash"
@@ -35,249 +71,250 @@ await highlightAll({
 });
 ```
 
-Alias targets must be names of shipped grammars.
+| Option | Default | Description |
+| --- | --- | --- |
+| `root` | `document` | Element or document to search |
+| `selector` | `"pre > code"` | Selector used to find code blocks |
+| `languageAliases` | `{}` | Extra aliases mapped to bundled grammars |
 
-### Web component
+`highlightAll()` returns a promise containing the highlighted code elements.
 
-The opt-in `microlighter/micro-lighter-element.min.js` bundle registers a
-`<micro-lighter>` custom element. A readable `micro-lighter-element.js` bundle
-is also available. The element keeps the `<pre><code>` content in the light DOM,
-so the same highlighter and theme styles work without replacing the code with
-token markup:
+### Automatic highlighting
+
+Import the auto runner to highlight the page as soon as the module loads:
 
 ```html
 <link rel="stylesheet" href="./node_modules/microlighter/themes/github.css">
-<script type="module" src="./node_modules/microlighter/micro-lighter-element.min.js"></script>
+<script type="module" src="./node_modules/microlighter/microlighter.min.js"></script>
 
-<micro-lighter language="javascript" controls="copy" line-numbers>
-  <pre><code>const answer = 42;</code></pre>
-</micro-lighter>
-```
-
-The element's `language` attribute takes precedence when present. Without it,
-the component uses the standard `language-*` class or `data-language` metadata
-on the nested `<code>` or `<pre>`. `controls` accepts comma- or space-separated
-control names. The `copy` control adds a copy button. Style it with
-`micro-lighter::part(copy-button)`. Add the boolean `line-numbers` attribute to
-show a gutter that stays out of copied code.
-
-### 1. Auto (drop-in)
-
-The auto-run entry (`microlighter/microlighter.js`, or the minified
-`microlighter/microlighter.min.js`) runs on import: it scans the page for
-supported `<pre> > <code>` block, lazily imports only the grammars it needs, tokenizes each
-block, registers ranges with `CSS.highlights`, and re-highlights whenever a
-`syntax-highlight` event fires.
-
-```html
 <body data-syntax-theme="github">
-<link rel="stylesheet" href="./src/themes/github.css">
-<script type="module" src="./src/microlighter.js"></script>
 ```
 
-To re-highlight after dynamically adding code (e.g. in a SPA):
+After adding or changing code, dispatch this event to highlight again:
 
 ```js
 document.dispatchEvent(new Event("syntax-highlight"));
 ```
 
-### 2. Programmatic (side-effect-free)
+The event can also bubble from a code block or one of its parents.
 
-The default entry (`microlighter`) exports `highlightAll()` and does **nothing**
-on import, so it's tree-shakeable and safe to pull into a bundler. Call it when
-you're ready:
+### CDN
 
-```js
-import { highlightAll } from "microlighter";
-
-await highlightAll();
-
-// Scope to part of the page, or use a custom selector:
-await highlightAll({ root: document.querySelector("#docs") });
-await highlightAll({ selector: "pre.code > code" });
-```
-
-The low-level tokenizer is also available on its own via
-`microlighter/highlight.js` if you want to drive grammar resolution yourself.
-
-### 3. CDN / single file
-
-`microlighter/microlighter.min.js` is a prebuilt, minified single-file bundle of
-the auto runner (~2 KiB gzip) with no separate grammar requests inlined —
-grammars and themes are still fetched on demand:
+Use the auto runner directly from a CDN:
 
 ```html
-<script type="module" src="https://cdn.example.com/microlighter/microlighter.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/microlighter@2/themes/github.css">
+<script type="module" src="https://cdn.jsdelivr.net/npm/microlighter@2/microlighter.min.js"></script>
+
+<body data-syntax-theme="github">
+  <pre><code class="language-javascript">const answer = 42;</code></pre>
+</body>
 ```
 
-## Themes
+### Web component
 
-Themes are plain CSS files that style the highlight pseudo-elements
-(`::highlight(keyword)`, `::highlight(string)`, etc.). Load one theme directly
-and set its name in `data-syntax-theme` on `<body>` or any containing element:
+Import the optional `<micro-lighter>` custom element:
 
 ```html
-<body data-syntax-theme="night-owl">
-<link rel="stylesheet" href="./src/themes/night-owl.css">
+<link rel="stylesheet" href="./node_modules/microlighter/themes/github.css">
+<script type="module" src="./node_modules/microlighter/micro-lighter-element.min.js"></script>
+
+<body data-syntax-theme="github">
+  <micro-lighter language="javascript" controls="copy" line-numbers>
+    <pre><code>const answer = 42;</code></pre>
+  </micro-lighter>
+</body>
 ```
 
-Highlight names flatten canonical TextMate scope terms into stable CSS
-identifiers. Related categories share a smaller color palette:
-
-| Theme variable | Highlight categories |
+| Attribute | Description |
 | --- | --- |
-| `--syntax-comment` | `comment`, `quote` |
-| `--syntax-keyword` | `keyword`, `storage`, `at-rule`, `doctype`, `important`, `section` |
-| `--syntax-operator` | `operator`, `punctuation` |
-| `--syntax-string` | `string`, `regexp`, `attribute-value`, `link`, `raw` |
-| `--syntax-constant` | `numeric`, `boolean`, `constant`, `symbol`, `character-entity`, `entity`, `anchor` |
-| `--syntax-function` | `function`, `decorator`, `animation` |
-| `--syntax-type` | `type`, `support` |
-| `--syntax-variable` | `variable`, `interpolation` |
-| `--syntax-property` | `property`, `key`, `attribute-name` |
-| `--syntax-tag` | `tag` |
-| `--syntax-selector` | `selector` |
-| `--syntax-inserted` | `inserted` |
-| `--syntax-deleted` | `deleted` |
+| `language` | Language to use. Overrides language metadata on `<pre>` or `<code>` |
+| `controls="copy"` | Adds a copy button |
+| `line-numbers` | Adds a line number gutter without changing copied code |
 
-Bundled themes:
+Style the controls with `::part(copy-button)` and `::part(line-numbers)`.
 
-- `github`
-- `vscode-plus`
-- `dracula`
-- `monokai`
-- `night-owl`
-- `solarized-light`
-- `vesper`
-- `min`
-- `cobalt2`
-- `tokyo-night`
+## Language detection
+
+The recommended format is a `language-*` class:
+
+```html
+<pre><code class="language-typescript">const answer: number = 42;</code></pre>
+```
+
+You can also use `data-language` on `<code>` or `<pre>`:
+
+```html
+<pre data-language="typescript"><code>const answer: number = 42;</code></pre>
+```
+
+Avoid `<pre lang="typescript">` in new code. MicroLighter supports it for
+compatibility, but the HTML `lang` attribute should describe human language.
+
+Common aliases work automatically:
+
+| Aliases | Language |
+| --- | --- |
+| `js`, `jsx` | `javascript` |
+| `ts` | `typescript` |
+| `sh`, `shell`, `zsh` | `bash` |
+| `yml` | `yaml` |
+| `md` | `markdown` |
+| `sass` | `scss` |
+| `docker` | `dockerfile` |
+| `py` | `python` |
+| `rb` | `ruby` |
+| `gql` | `graphql` |
+
+Custom aliases passed to `highlightAll()` must point to a bundled language.
 
 ## Languages
 
-Grammars ship as ES modules in `src/grammars/` and are loaded on demand:
-`assembly`, `bash`, `c`, `cpp`, `csharp`, `css`, `dart`, `dockerfile`, `git-diff`,
-`go`, `graphql`, `html`, `java`, `javascript`, `json`, `kotlin`, `lua`, `markdown`,
-`objective-c`, `perl`, `php`, `powershell`, `python`, `r`, `ruby`, `rust`, `scss`,
-`sql`, `svelte`, `swift`, `toml`, `tsx`, `typescript`, `vue`, `yaml`. `tsx` is a
-genuine grammar (TypeScript constructs plus JSX), not just an alias to
-`typescript`. `objective-c` reuses the shared `c` grammar's comments,
-preprocessor, and strings via external includes. `assembly` targets generic x86
-Intel/NASM syntax. First-party common blog-oriented aliases include:
-`js` and `jsx` → `javascript`, `ts` → `typescript`, `sass` → `scss`, `sh` and
-`shell` and `zsh` → `bash`, `yml` → `yaml`, `md` → `markdown`, `docker` →
-`dockerfile`, `py` → `python`, `rb` → `ruby`, and `gql` → `graphql`.
+MicroLighter includes these grammars:
 
-## Build
+`assembly`, `bash`, `c`, `cpp`, `csharp`, `css`, `dart`, `dockerfile`,
+`git-diff`, `go`, `graphql`, `html`, `java`, `javascript`, `json`, `kotlin`,
+`lua`, `markdown`, `objective-c`, `perl`, `php`, `powershell`, `python`, `r`,
+`ruby`, `rust`, `scss`, `sql`, `svelte`, `swift`, `toml`, `tsx`, `typescript`,
+`vue`, and `yaml`.
 
-Produce the distributable `dist/` folder (copied ESM modules plus unminified and
-minified single-file bundles at `dist/microlighter.js` and
-`dist/microlighter.min.js`):
+Grammars are ES modules and load on demand.
+
+## Themes
+
+Load one theme and set the matching `data-syntax-theme` value on `<body>` or
+any container:
+
+```html
+<link rel="stylesheet" href="./node_modules/microlighter/themes/night-owl.css">
+
+<section data-syntax-theme="night-owl">
+  <!-- code blocks -->
+</section>
+```
+
+Bundled themes:
+
+- `cobalt2`
+- `dracula`
+- `github`
+- `min`
+- `monokai`
+- `night-owl`
+- `solarized-light`
+- `tokyo-night`
+- `vesper`
+- `vscode-plus`
+
+Themes use CSS custom properties for a small color palette:
+
+| Property | Token categories |
+| --- | --- |
+| `--syntax-comment` | Comments and quotes |
+| `--syntax-keyword` | Keywords, storage, at-rules, and sections |
+| `--syntax-operator` | Operators and punctuation |
+| `--syntax-string` | Strings, regular expressions, links, and attribute values |
+| `--syntax-constant` | Numbers, booleans, constants, symbols, and entities |
+| `--syntax-function` | Functions, decorators, and animations |
+| `--syntax-type` | Types and support tokens |
+| `--syntax-variable` | Variables and interpolation |
+| `--syntax-property` | Properties, keys, and attribute names |
+| `--syntax-tag` | Tags |
+| `--syntax-selector` | Selectors |
+| `--syntax-inserted` | Inserted text |
+| `--syntax-deleted` | Deleted text |
+
+## Editable code
+
+MicroLighter keeps code as plain text, so code blocks can remain editable. Call
+the highlighter after each change:
+
+```html
+<editable-code>
+  <pre><code class="language-javascript">const answer = 42;</code></pre>
+</editable-code>
+
+<script type="module">
+  import "microlighter/microlighter.min.js";
+
+  class EditableCode extends HTMLElement {
+    connectedCallback() {
+      const code = this.querySelector("pre > code");
+      if (!code) return;
+
+      code.contentEditable = "plaintext-only";
+      code.spellcheck = false;
+      code.setAttribute("aria-label", "Editable code");
+      this.addEventListener("input", () => {
+        this.dispatchEvent(new Event("syntax-highlight", { bubbles: true }));
+      });
+    }
+  }
+
+  customElements.define("editable-code", EditableCode);
+</script>
+```
+
+Keep `<pre><code>` in the light DOM so MicroLighter can find it.
+
+## How it works
+
+MicroLighter reads TextMate grammars with the browser's native `RegExp`. It
+turns matching token ranges into `Highlight` objects and styles them with
+`::highlight()`. It does not use Oniguruma, WebAssembly, or generated token
+markup.
+
+This keeps the library small. The trade-off is less language coverage and
+grammar accuracy than larger tools such as [Shiki][shiki].
+
+The low-level tokenizer is available from `microlighter/highlight.js` for
+advanced integrations.
+
+## Development
+
+Requires Node.js 18 or newer.
 
 ```sh
+npm install
 npm run build
-```
-
-The build prints a size report: raw / gzip / brotli for the shipped bundle, a
-raw / minified / gzip breakdown of every lazily-loaded grammar and theme, and an
-average size per category (grammars vs. themes). It fails if the bundle's gzip
-size exceeds the `sizeLimit` in `package.json`. Run the report on its own anytime
-with:
-
-```sh
-npm run size
-```
-
-## Tests
-
-End-to-end tests drive the demo site (`docs/index.html`) in a real browser
-(system Chrome) with Playwright and assert that highlight ranges register, the
-core token categories are present, and theme switching re-highlights cleanly:
-
-```sh
 npm test
 ```
 
-`npm test` first rebuilds `dist/` and the generated `docs/microlighter/` copy so
-tests run against current code. The pre-commit hook updates and stages the headline
-gzip size on the demo homepage (`docs/index.html`) automatically. To update it
-explicitly without committing, run:
+Useful commands:
 
-```sh
-npm run docs:update-homepage-stats
-```
+| Command | Description |
+| --- | --- |
+| `npm run build` | Build `dist/`, update the local demo package, and report sizes |
+| `npm test` | Build and run Node.js and Playwright tests |
+| `npm run size` | Print the size report without changing files |
+| `npm run docs:update-homepage-stats` | Update the homepage bundle size |
+| `npx serve docs` | Serve the demo at `http://localhost:3000` |
 
-This rebuilds the bundle and writes the current gzip size into the homepage. Plain
-`npm run size` is read-only and never edits the homepage.
+The build fails when the minified bundle exceeds the gzip size limit in
+`package.json`.
 
-## Demo
-
-The demo lives in `docs/` as a self-contained static site. `npm run build`
-generates a git-ignored copy of the package in `docs/microlighter/`, which
-`docs/index.html` loads. Serve the `docs/` folder over HTTP so ES module imports
-resolve:
-
-```sh
-npm run build   # populates docs/microlighter/
-npx serve docs
-```
-
-### Publishing to GitHub Pages
-
-The CI workflow builds and tests the package, uploads the generated `docs/`
-directory as a Pages artifact, and deploys it on pushes to `main`. This keeps
-the package copy out of Git while avoiding a second build or a `gh-pages`
-branch. In **Settings → Pages**, set the source to **GitHub Actions**.
-
-## Contributing
-
-Contributions are welcome — new grammars, themes, bug fixes, and docs. See
-[CONTRIBUTING.md](./CONTRIBUTING.md) for the dev setup, project layout, and how
-to add a grammar or theme.
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for the project structure and guides
+for adding grammars and themes.
 
 ## Prior art
 
-MicroLighter stands on the shoulders of a lot of existing work. The technique of
-highlighting code with the [CSS Custom Highlight API][highlight-api] — mapping
-token ranges to `Highlight` objects instead of wrapping every token in a
-`<span>` — is not new, and neither are TextMate grammars. What MicroLighter adds
-is a tiny, dependency-free implementation: it parses [TextMate grammars][tm]
-with the browser's native `RegExp` (using the [`d` flag][d-flag] for match
-indices) rather than shipping the Oniguruma WASM engine, lazily loads grammars,
-and flattens scopes into semantic category names derived from TextMate.
+MicroLighter builds on [TextMate grammars][tm] and work across the syntax
+highlighting community:
 
-Foundations and inspiration:
+- [Prism.js][prism] inspired the semantic CSS categories.
+- [Shiki][shiki] is the full-featured TextMate highlighter for the web.
+- [Bramus Van Damme's Custom Highlight API article][bramus] popularized this
+  rendering technique.
+- Related projects include [textmate-highlighter][tmh],
+  [syntax-highlight-element][she], [shiki-highlight-api][sha], and
+  [syntaxp][syntaxp].
 
-- **[TextMate grammars][tm]** — the grammar format (scopes, `begin`/`end`,
-  `patterns`, `repository`, `include`) that MicroLighter interprets. Popularized
-  by [TextMate][textmate] and adopted by [VS Code][vscode-grammar], which is
-  where most of the community `.tmLanguage.json` grammars come from.
-- **[Prism.js][prism]** — inspiration for styling semantic token categories
-  directly with CSS. MicroLighter uses `::highlight(...)` rather than generated
-  token spans and names its categories from TextMate scopes.
-- **[Shiki][shiki]** — the canonical TextMate-grammar-based highlighter for the
-  web (backed by VS Code's Oniguruma tokenizer). MicroLighter trades Shiki's
-  accuracy and language coverage for zero dependencies and a smaller footprint.
-- **[Bramus Van Damme's "Syntax Highlighting code snippets with Prism and the
-  Custom Highlight API"][bramus]** — the 2024 write-up that popularized using the
-  Custom Highlight API for syntax highlighting.
+## License
 
-Similar projects worth knowing about:
-
-- **[textmate-highlighter][tmh]** — TextMate grammars + VS Code themes with a
-  CSS Custom Highlights render target (uses Oniguruma).
-- **[syntax-highlight-element][she]** — a web component that pairs Prism.js with
-  the Custom Highlight API.
-- **[shiki-highlight-api][sha]** — renders Shiki tokens through the Custom
-  Highlight API.
-- **[syntaxp][syntaxp]** — a minimal auto-detecting highlighter over the Custom
-  Highlight API.
+[MIT](./LICENSE) © Dave Rupert
 
 [highlight-api]: https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API
-[d-flag]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/hasIndices
 [tm]: https://macromates.com/manual/en/language_grammars
-[textmate]: https://macromates.com/
-[vscode-grammar]: https://code.visualstudio.com/api/language-extensions/syntax-highlight-guide
 [prism]: https://prismjs.com/
 [shiki]: https://shiki.style/
 [bramus]: https://www.bram.us/2024/02/18/custom-highlight-api-for-syntax-highlighting/
@@ -285,7 +322,3 @@ Similar projects worth knowing about:
 [she]: https://github.com/andreruffert/syntax-highlight-element
 [sha]: https://github.com/shiki-highlights/shiki-highlight-api
 [syntaxp]: https://meiert.com/en/blog/custom-highlight-api-syntaxp/
-
-## License
-
-[MIT](./LICENSE) © Dave Rupert

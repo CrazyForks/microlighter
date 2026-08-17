@@ -117,7 +117,7 @@
       <article class="feature">
         <span class="feature-index" aria-hidden="true">02</span>
         <div class="feature-specimen size-specimen" aria-hidden="true">
-          <span class="size-value">2.04</span><span class="size-unit">kb<br>gzip</span>
+          <span class="size-value">2.05</span><span class="size-unit">kb<br>gzip</span>
         </div>
         <h2>Blazingly fast!!</h2>
       </article>
@@ -754,8 +754,16 @@ jobs:
       if (!template) return;
 
       playgroundOutput.replaceChildren(template.content.cloneNode(true));
+      const codeBlock = playgroundOutput.querySelector("code");
+      codeBlock.contentEditable = "plaintext-only";
+      codeBlock.spellcheck = false;
+      codeBlock.setAttribute("aria-label", "Editable code sample");
       playgroundOutput.dispatchEvent(new CustomEvent("syntax-highlight", { bubbles: true }));
     };
+
+    playgroundOutput.addEventListener("input", () => {
+      playgroundOutput.dispatchEvent(new CustomEvent("syntax-highlight", { bubbles: true }));
+    });
 
     playgroundSelect.addEventListener("change", event => {
       renderPlaygroundSample(event.target.value);
@@ -764,6 +772,6 @@ jobs:
     playgroundSelect.value = defaultPlaygroundLanguage;
     renderPlaygroundSample(defaultPlaygroundLanguage);
   </script>
-  <script type="module" src="./microlighter/microlighter.js"></script>
+  <script type="module" src="./microlighter/microlighter.min.js"></script>
 </body>
 </html>

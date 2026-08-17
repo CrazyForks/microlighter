@@ -138,6 +138,32 @@ test.describe("MicroLighter demo site (docs/index.html)", () => {
     ]));
   });
 
+  test("normalizes adjacent text nodes before highlighting", async ({ page }) => {
+    await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
+
+    await page.evaluate(() => {
+      const pre = document.createElement("pre");
+      const code = document.createElement("code");
+      code.id = "adjacent-text-nodes";
+      code.className = "language-javascript";
+      code.append(new Text("const answer"), new Text(" = 42;"));
+      pre.append(code);
+      document.body.append(pre);
+      document.dispatchEvent(new Event("syntax-highlight"));
+    });
+
+    await expect.poll(() => page.evaluate(() => {
+      const code = document.querySelector("#adjacent-text-nodes");
+      let highlighted = false;
+      for (const highlight of CSS.highlights.values()) {
+        for (const range of highlight) {
+          if (range.startContainer.parentElement === code) highlighted = true;
+        }
+      }
+      return { childNodes: code.childNodes.length, highlighted };
+    })).toEqual({ childNodes: 1, highlighted: true });
+  });
+
   test("accepts built-in and custom language aliases through the import API", async ({ page }) => {
     await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
 
@@ -302,6 +328,29 @@ test.describe("Language playground", () => {
     await expect(page.locator("#playground-output code[class*='language-']")).toHaveCount(1);
     await expect(page.locator("#playground-output code.language-yaml")).toHaveCount(1);
     await expect(page.locator("#playground-output code.language-rust")).toHaveCount(0);
+  });
+
+  test("edits and re-highlights the selected sample", async ({ page }) => {
+    await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
+
+    const codeBlock = page.locator("#playground-output code.language-css");
+    await expect(codeBlock).toHaveAttribute("contenteditable", "plaintext-only");
+    await codeBlock.fill(".playground { color: hotpink; }");
+    await codeBlock.press("End");
+    await codeBlock.press("Enter");
+    await codeBlock.pressSequentially("/* Still editable */");
+    await expect(codeBlock).toHaveText(".playground { color: hotpink; }\n/* Still editable */");
+
+    await expect.poll(() => page.evaluate(() => {
+      const editableCode = document.querySelector("#playground-output code.language-css");
+      if (editableCode.childNodes.length !== 1 || editableCode.firstChild.nodeType !== Node.TEXT_NODE) return false;
+      for (const highlight of CSS.highlights.values()) {
+        for (const range of highlight) {
+          if (range.startContainer === editableCode.firstChild) return true;
+        }
+      }
+      return false;
+    })).toBe(true);
   });
 
   test("select options cover every canonical grammar with a readable label", async ({ page }) => {

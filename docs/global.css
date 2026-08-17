@@ -607,6 +607,11 @@ pre {
   }
 }
 
+[contenteditable]:focus-visible {
+  outline-color: transparent;
+  outline-offset: 2px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     transition: none !important;
