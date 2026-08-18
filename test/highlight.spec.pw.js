@@ -79,6 +79,12 @@ test.describe("MicroLighter demo site (docs/index.html)", () => {
     for (const theme of themes) {
       await page.selectOption("#theme", theme);
 
+      await expect.poll(() => page.evaluate(() =>
+        getComputedStyle(document.documentElement)
+          .getPropertyValue("--syntax-background")
+          .trim()
+      )).not.toBe("");
+
       const styles = await page.evaluate(() => {
         const root = getComputedStyle(document.documentElement);
         // Find a live, currently-rendered code block robustly: one of the
