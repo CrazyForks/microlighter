@@ -350,6 +350,7 @@ export function YetAnotherTodoApp(): JSX.Element {
             <li data-lang="tsx">TSX</li>
             <li data-lang="svelte">Svelte</li>
             <li data-lang="vue">Vue</li>
+            <li data-lang="heex">HEEx</li>
           </ul>
         </div>
         <div class="language-group">
@@ -372,6 +373,7 @@ export function YetAnotherTodoApp(): JSX.Element {
             <li data-lang="objective-c">Objective-C</li>
             <li data-lang="dart">Dart</li>
             <li data-lang="php">PHP</li>
+            <li data-lang="elixir">Elixir</li>
           </ul>
         </div>
         <div class="language-group">
@@ -474,6 +476,13 @@ WORKDIR /app
 COPY . .
 RUN npm ci &amp;&amp; npm run build</code></pre>
       </template>
+      <template data-lang="elixir" data-label="Elixir">
+        <pre><code class="language-elixir">defmodule Tokenizer do
+  @moduledoc "Turns source into tokens."
+
+  def tokenize(source), do: String.split(source, " ")
+end</code></pre>
+      </template>
       <template data-lang="git-diff" data-label="Git diff">
         <pre><code class="language-git-diff">diff --git a/src/index.js b/src/index.js
 --- a/src/index.js
@@ -498,6 +507,12 @@ query GetToken($id: ID!) {
     scope
   }
 }</code></pre>
+      </template>
+      <template data-lang="heex" data-label="HEEx">
+        <pre><code class="language-heex">&lt;%!-- Render the current count --%&gt;
+&lt;.button phx-click="increment" :if={@enabled}&gt;
+  &lt;%= gettext "Count" %&gt;: {@count}
+&lt;/.button&gt;</code></pre>
       </template>
       <template data-lang="html" data-label="HTML">
         <pre><code class="language-html">&lt;!-- A comment stays a comment --&gt;

@@ -88,8 +88,8 @@ current code.
 ## Updating the homepage size figure
 
 `npm install` configures the tracked pre-commit hook in `.githooks/`. Before each
-commit, it rebuilds the package, updates the headline gzip number on the demo
-homepage, and stages that generated change.
+commit, it runs the test suite, rebuilds the package, updates the headline gzip
+number on the demo homepage, and stages that generated change.
 
 To refresh it explicitly without committing, run:
 

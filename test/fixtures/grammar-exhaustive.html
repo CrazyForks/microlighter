@@ -62,6 +62,11 @@ struct Token {
 WORKDIR /app
 COPY . .
 RUN npm ci &amp;&amp; npm run build</code></pre>
+    <pre><code class="language-elixir">defmodule Tokenizer do
+  @moduledoc "Turns source into tokens."
+
+  def tokenize(source), do: String.split(source, " ")
+end</code></pre>
     <pre><code class="language-git-diff">diff --git a/src/index.js b/src/index.js
 --- a/src/index.js
 +++ b/src/index.js
@@ -81,6 +86,10 @@ query GetToken($id: ID!) {
     scope
   }
 }</code></pre>
+    <pre><code class="language-heex">&lt;%!-- Render the current count --%&gt;
+&lt;.button phx-click="increment" :if={@enabled}&gt;
+  &lt;%= gettext "Count" %&gt;: {@count}
+&lt;/.button&gt;</code></pre>
     <pre><code class="language-html">&lt;!-- A comment stays a comment --&gt;
 &lt;button type="button" aria-pressed="false"&gt;42&lt;/button&gt;</code></pre>
     <pre><code class="language-java">public class Token {

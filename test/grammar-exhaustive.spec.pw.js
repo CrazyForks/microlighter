@@ -118,4 +118,24 @@ test.describe("Grammar exhaustive fixture (test/fixtures/grammar-exhaustive.html
     expect(componentHighlights.vueAttributes).toContain("@click");
     expect(componentHighlights.vueStorage).toContain("const");
   });
+
+  test("categorizes Elixir embedded in HEEx templates", async ({ page }) => {
+    await page.goto(FIXTURE, { waitUntil: "networkidle" });
+
+    const heexHighlights = await page.evaluate(() => {
+      const getRanges = category => [...CSS.highlights.get(category) ?? []]
+        .filter(range => range.startContainer.parentElement?.closest("code.language-heex"))
+        .map(range => range.toString());
+
+      return {
+        attributes: getRanges("attribute-name"),
+        functions: getRanges("function"),
+        variables: getRanges("variable")
+      };
+    });
+
+    expect(heexHighlights.attributes).toEqual(expect.arrayContaining(["phx-click", ":if"]));
+    expect(heexHighlights.functions).toContain("gettext");
+    expect(heexHighlights.variables).toEqual(expect.arrayContaining(["@enabled", "@count"]));
+  });
 });
