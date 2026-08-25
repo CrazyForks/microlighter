@@ -321,4 +321,4 @@ highlighting community:
 [tmh]: https://github.com/fabiospampinato/textmate-highlighter
 [she]: https://github.com/andreruffert/syntax-highlight-element
 [sha]: https://github.com/shiki-highlights/shiki-highlight-api
-[syntaxp]: https://meiert.com/en/blog/custom-highlight-api-syntaxp/
+[syntaxp]: https://github.com/j9t/syntaxp
