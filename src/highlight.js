@@ -25,6 +25,8 @@ const loadGrammars = createGrammarLoader();
  */
 const highlights = new Map();
 
+const noMatch = { indices: [[Infinity, Infinity]] };
+
 /**
  * Flatten a TextMate scope to a stable semantic CSS highlight category.
  * @param {string} scope
@@ -136,6 +138,7 @@ export const highlightAll = async ({
   );
   const grammars = await loadGrammars(languages);
   const regexes = new Map();
+  let matches = new Map();
 
   highlights.forEach((ranges, category) => {
     if (CSS.highlights.get(category) === ranges) CSS.highlights.delete(category);
@@ -143,7 +146,8 @@ export const highlightAll = async ({
   });
 
   /**
-   * Find the next bounded match while reusing compiled grammar expressions.
+   * Find the next bounded match, reusing compiled grammar expressions and the
+   * memoized match for each pattern.
    * @param {string} pattern
    * @param {Text} node
    * @param {number} start
@@ -151,11 +155,17 @@ export const highlightAll = async ({
    * @returns {RegExpExecArray | null}
    */
   const exec = (pattern, node, start, end) => {
-    if (!regexes.has(pattern)) regexes.set(pattern, new RegExp(pattern, "dgm"));
-    const regex = regexes.get(pattern);
-    regex.lastIndex = start;
-    const match = regex.exec(node.data);
-    return match && match.indices[0][0] < end && match.indices[0][1] <= end ? match : null;
+    let match = matches.get(pattern);
+
+    if (!match || match.indices[0][0] < start) {
+      if (!regexes.has(pattern)) regexes.set(pattern, new RegExp(pattern, "dgm"));
+      const regex = regexes.get(pattern);
+      regex.lastIndex = start;
+      match = regex.exec(node.data) || noMatch;
+      matches.set(pattern, match);
+    }
+
+    return match.indices[0][0] < end && match.indices[0][1] <= end ? match : null;
   };
 
   /**
@@ -303,6 +313,8 @@ export const highlightAll = async ({
     codeBlock.normalize();
     const node = codeBlock.firstChild;
     if (node?.nodeType !== Node.TEXT_NODE || node.nextSibling) return;
+
+    matches = new Map();
 
     scanRegion(node, grammar.patterns, 0, node.data.length, grammar);
   });
