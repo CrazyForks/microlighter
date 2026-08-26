@@ -28,7 +28,7 @@ export default {
           name: "keyword.control.directive.include",
           patterns: [
             { match: "<[^>]*>", name: "string.quoted.other.lt-gt" },
-            { match: "\"(?:\\\\.|[^\"\\\\])*\"", name: "string.quoted.double" }
+            { match: "\"(?:\\\\.|[^\"\\\\\\r\\n])*\"", name: "string.quoted.double" }
           ]
         },
         {
@@ -39,8 +39,8 @@ export default {
     },
     strings: {
       patterns: [
-        { match: "'(?:\\\\.|[^'\\\\])'", name: "string.quoted.char" },
-        { match: "\"(?:\\\\.|[^\"\\\\])*\"", name: "string.quoted.double" }
+        { match: "'(?:\\\\.|[^'\\\\\\r\\n])'", name: "string.quoted.char" },
+        { match: "\"(?:\\\\.|[^\"\\\\\\r\\n])*\"", name: "string.quoted.double" }
       ]
     },
     "storage-types": {

@@ -11,7 +11,7 @@ export default {
   ],
   repository: {
     comments: { begin: "/\\*", end: "\\*/", name: "comment.block" },
-    strings: { match: "(['\"])(?:\\\\.|(?!\\1)[^\\\\])*\\1", name: "string.quoted" },
+    strings: { match: "(['\"])(?:\\\\.|(?!\\1)[^\\\\\\r\\n])*\\1", name: "string.quoted" },
     keyframes: {
       begin: "(@(?:-\\w+-)?keyframes)\\s+([a-zA-Z_-][\\w-]*)\\s*\\{",
       end: "\\}",
@@ -22,7 +22,7 @@ export default {
       patterns: [{ include: "$self" }]
     },
     "at-rule-block": {
-      begin: "(@(?:container|document|font-feature-values|layer|media|scope|starting-style|supports)\\b)[^{;]*\\{",
+      begin: "(@(?:container|counter-style|document|font-face|font-feature-values|font-palette-values|layer|media|page|position-try|scope|starting-style|supports|view-transition)\\b)[^{;]*\\{",
       end: "\\}",
       beginCaptures: { 1: { name: "keyword.control.at-rule" } },
       patterns: [{ include: "$self" }]
@@ -38,7 +38,7 @@ export default {
       ]
     },
     "rule-set": {
-      begin: "([^\\s@{};<][^@{};<;]*?)\\s*\\{",
+      begin: "([^\\s@{};<][^@{};<]*?)\\s*\\{",
       end: "\\}",
       beginCaptures: { 1: { name: "entity.name.selector" } },
       patterns: [

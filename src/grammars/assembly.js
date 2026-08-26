@@ -22,8 +22,8 @@ export default {
     },
     strings: {
       patterns: [
-        { match: "'(?:\\\\.|[^'\\\\])*'", name: "string.quoted.single" },
-        { match: "\"(?:\\\\.|[^\"\\\\])*\"", name: "string.quoted.double" }
+        { match: "'(?:\\\\.|[^'\\\\\\r\\n])*'", name: "string.quoted.single" },
+        { match: "\"(?:\\\\.|[^\"\\\\\\r\\n])*\"", name: "string.quoted.double" }
       ]
     },
     "label-declaration": {

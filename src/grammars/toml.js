@@ -25,7 +25,7 @@ export default {
       patterns: [
         { begin: "\"\"\"", end: "\"\"\"", name: "string.quoted.triple.double" },
         { begin: "'''", end: "'''", name: "string.quoted.triple.single" },
-        { match: "\"(?:\\\\.|[^\"\\\\])*\"", name: "string.quoted.double" },
+        { match: "\"(?:\\\\.|[^\"\\\\\\r\\n])*\"", name: "string.quoted.double" },
         { match: "'[^'\\r\\n]*'", name: "string.quoted.single" }
       ]
     },

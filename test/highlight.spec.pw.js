@@ -24,6 +24,33 @@ const readHighlights = page =>
     };
   });
 
+/**
+ * Highlight a single injected code block and read back its ranges by category.
+ */
+const highlightSnippet = (page, language, code) =>
+  page.evaluate(async ({ language, code }) => {
+    const root = document.createElement("div");
+    const block = document.createElement("code");
+    const pre = document.createElement("pre");
+    block.className = `language-${language}`;
+    block.textContent = code;
+    pre.append(block);
+    root.append(pre);
+    document.body.append(root);
+
+    const { highlightAll } = await import("/docs/microlighter/index.js");
+    await highlightAll({ root });
+
+    const ranges = {};
+    for (const [category, highlight] of CSS.highlights) {
+      for (const range of highlight) {
+        if (range.startContainer.parentElement !== block) continue;
+        (ranges[category] ??= []).push(range.toString());
+      }
+    }
+    return ranges;
+  }, { language, code });
+
 test.describe("MicroLighter demo site (docs/index.html)", () => {
   test("registers highlight ranges across every code block", async ({ page }) => {
     await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
@@ -229,6 +256,81 @@ test.describe("MicroLighter demo site (docs/index.html)", () => {
           .slice("language-".length)));
 
     expect(sampleLanguages).toEqual(["html", "markdown", "python", "sql", "cpp", "tsx"]);
+  });
+
+  test("stops unterminated quotes from swallowing later lines", async ({ page }) => {
+    await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
+
+    const css = await highlightSnippet(page, "css", [
+      "a { font-family: Don't; }",
+      'b { content: "kept"; }',
+      "c { font-family: Won't; }"
+    ].join("\n"));
+    const yaml = await highlightSnippet(page, "yaml", [
+      "first: don't",
+      'second: "kept"',
+      "third: won't"
+    ].join("\n"));
+
+    expect(css.string).toEqual(['"kept"']);
+    expect(yaml.string).toEqual(['"kept"']);
+  });
+
+  test("terminates single-line string literals at the end of the line", async ({ page }) => {
+    await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
+
+    // Languages whose grammars only allow multi-line strings through a
+    // dedicated triple-quoted or long-bracket rule.
+    const languages = [
+      "assembly", "c", "csharp", "css", "dart", "graphql",
+      "java", "kotlin", "lua", "swift", "toml"
+    ];
+    const unexpected = {};
+
+    for (const language of languages) {
+      const ranges = await highlightSnippet(page, language, 'first = \'x\nsecond = "kept"\nthird = \'y\'\n');
+      const strings = ranges.string ?? [];
+      if (!strings.includes('"kept"') || strings.some(value => value.includes("\n"))) {
+        unexpected[language] = strings;
+      }
+    }
+
+    expect(unexpected).toEqual({});
+  });
+
+  test("keeps highlighting yaml quoted scalars folded over several lines", async ({ page }) => {
+    await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
+
+    const ranges = await highlightSnippet(page, "yaml", 'key: "folded\n  continuation"\nnext: 1\n');
+
+    expect(ranges.string).toEqual(['"folded\n  continuation"']);
+  });
+
+  test("categorizes block at-rules as at-rule keywords, not selectors", async ({ page }) => {
+    await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
+
+    const ranges = await highlightSnippet(page, "css", [
+      '@font-face { font-family: "Example"; }',
+      "@page { margin: 1cm; }",
+      "@counter-style thumbs { system: cyclic; }",
+      "@view-transition { navigation: auto; }"
+    ].join("\n"));
+
+    expect(ranges["at-rule"]).toEqual([
+      "@font-face",
+      "@page",
+      "@counter-style",
+      "@view-transition"
+    ]);
+    expect(ranges.selector ?? []).toEqual([]);
+  });
+
+  test("scopes multi-line selectors without their trailing whitespace", async ({ page }) => {
+    await page.goto(HOMEPAGE, { waitUntil: "networkidle" });
+
+    const ranges = await highlightSnippet(page, "css", "a,\nb\n{\n  color: red;\n}\n");
+
+    expect(ranges.selector).toEqual(["a,\nb"]);
   });
 
   test("loads without runtime errors", async ({ page }) => {

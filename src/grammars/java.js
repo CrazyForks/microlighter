@@ -23,8 +23,8 @@ export default {
     strings: {
       patterns: [
         { begin: "\"\"\"", end: "\"\"\"", name: "string.quoted.triple" },
-        { match: "\"(?:\\\\.|[^\"\\\\])*\"", name: "string.quoted.double" },
-        { match: "'(?:\\\\.|[^'\\\\])'", name: "string.quoted.char" }
+        { match: "\"(?:\\\\.|[^\"\\\\\\r\\n])*\"", name: "string.quoted.double" },
+        { match: "'(?:\\\\.|[^'\\\\\\r\\n])'", name: "string.quoted.char" }
       ]
     },
     annotations: { match: "@[A-Za-z_][\\w.]*", name: "entity.name.decorator" },
