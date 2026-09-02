@@ -21,8 +21,8 @@ export default {
     strings: {
       patterns: [
         { begin: "\\[(=*)\\[", end: "\\]\\1\\]", name: "string.quoted.other.multiline" },
-        { match: "\"(?:\\\\.|[^\"\\\\])*\"", name: "string.quoted.double" },
-        { match: "'(?:\\\\.|[^'\\\\])*'", name: "string.quoted.single" }
+        { match: "\"(?:\\\\.|[^\"\\\\\\r\\n])*\"", name: "string.quoted.double" },
+        { match: "'(?:\\\\.|[^'\\\\\\r\\n])*'", name: "string.quoted.single" }
       ]
     },
     "function-declaration": {

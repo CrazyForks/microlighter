@@ -23,7 +23,7 @@ export default {
     strings: {
       patterns: [
         { begin: "\"\"\"", end: "\"\"\"", name: "string.quoted.triple" },
-        { match: "\"(?:\\\\.|[^\"\\\\])*\"", name: "string.quoted.double" }
+        { match: "\"(?:\\\\.|[^\"\\\\\\r\\n])*\"", name: "string.quoted.double" }
       ]
     },
     attributes: { match: "@[A-Za-z_][\\w]*", name: "entity.name.decorator" },

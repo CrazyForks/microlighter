@@ -26,9 +26,9 @@ export default {
         { match: "@\"(?:\"\"|[^\"])*\"", name: "string.quoted.double.verbatim" },
         { match: "\\$@\"(?:\"\"|\\{\\{|\\}\\}|[^\"])*\"", name: "string.quoted.double.interpolated" },
         { match: "@\\$\"(?:\"\"|\\{\\{|\\}\\}|[^\"])*\"", name: "string.quoted.double.interpolated" },
-        { match: "\\$\"(?:\\\\.|\\{\\{|\\}\\}|[^\"\\\\])*\"", name: "string.quoted.double.interpolated" },
-        { match: "\"(?:\\\\.|[^\"\\\\])*\"", name: "string.quoted.double" },
-        { match: "'(?:\\\\.|[^'\\\\])'", name: "string.quoted.char" }
+        { match: "\\$\"(?:\\\\.|\\{\\{|\\}\\}|[^\"\\\\\\r\\n])*\"", name: "string.quoted.double.interpolated" },
+        { match: "\"(?:\\\\.|[^\"\\\\\\r\\n])*\"", name: "string.quoted.double" },
+        { match: "'(?:\\\\.|[^'\\\\\\r\\n])'", name: "string.quoted.char" }
       ]
     },
     attributes: { match: "\\[[A-Za-z_][\\w.]*\\]", name: "entity.name.decorator" },
